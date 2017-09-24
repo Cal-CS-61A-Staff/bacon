@@ -37,7 +37,8 @@ def convert(file):
         output_names[output_name] = 1
         full_output_name = output_name + '.strat'
 
-    os.makedirs(out_dir, exist_ok = True)
+	if out_dir:	os.makedirs(out_dir, exist_ok = True)
+	
     out = open(os.path.join(out_dir, full_output_name), 'w')
     
     for i in range(GOAL):

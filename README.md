@@ -4,7 +4,7 @@
 ### What does Bacon do?
 
 Bacon is an an analysis program for Hog, a dice game from the 
-CS61A class project [Hog](https://cs61a.org/proj/hog/). Students are encouraged to submit their strategies in the [Hog Contest](https://cs61a.org/proj/hog_contest/), the winners of which receive extra credit in the course.
+CS61A class project [Hog](https://cs61a.org/proj/hog/). Bacon was created for the [Hog Contest](https://cs61a.org/proj/hog_contest/), which is a Hog strategy contest students are encouraged to participate in.
 
 Bacon may be used by students to construct and test strategies, or by instructors to run contests. The system is designed to be highly efficient and a vast improvement over the old Hog Contest calculations.
 

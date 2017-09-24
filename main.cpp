@@ -290,7 +290,6 @@ void exec(string cmd){
         size_t total_strats = contestants.size();
         int total_games = (int)total_strats * ((int)total_strats - 1) / 2;
 
-
         cout << "Number of strategies: " << total_strats << "\n";
         cout << "Total games to play: " << total_games << "\n";
 
@@ -905,26 +904,25 @@ int main(int argc, char * argv[]) {
     // initialize
     init_console();
 
+    // speed up cin
+		cin.sync_with_stdio(0);
+		
+    #ifdef _WIN32
+            // Windows only
+
+            // change title of console, if possible
+            system((string("Title ") + APP_NAME).c_str());
+
+            CreateDirectoryA(STORAGE_ROOT.c_str(), NULL);
+    #else
+        
+            // make the storage directory, if possible
+            system((string("mkdir -p ") + STORAGE_ROOT).c_str());
+    #endif    
 
     if (argc <= 1) { // interactive mode
 
         string cmd;
-
-		// speed up cin
-		cin.sync_with_stdio(0);
-		
-#ifdef _WIN32
-        // Windows only
-
-        // change title of console, if possible
-        system((string("Title ") + APP_NAME).c_str());
-
-        CreateDirectoryA(STORAGE_ROOT.c_str(), NULL);
-#else
-	
-        // make the storage directory, if possible
-        system((string("mkdir -p ") + STORAGE_ROOT).c_str());
-#endif    
 
         // Print greeting message
         cout << "Welcome to " << APP_NAME << " v." << VERSION << "!\n(c) Alex Yu 2017" << endl;

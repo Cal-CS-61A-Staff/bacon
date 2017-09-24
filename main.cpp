@@ -11,10 +11,10 @@
 using namespace std;
 
 // The program's version number
-const char * VERSION = "1.3.2.43";
+const char * VERSION = "1.3.3.44";
 
 // The program name
-const char * NAME = "Bacon Console";
+const char * APP_NAME = "Bacon";
 
 // The console prompt
 const char * PROMPT = "Bacon > ";
@@ -721,7 +721,7 @@ void exec(string cmd){
 
     // logistics
     else if (cmd == "-v" || cmd == "version") {
-        cout << "Bacon console version " << VERSION <<
+        cout << APP_NAME << " version " << VERSION <<
             "\n(c) Alex Yu 2017\n\nSwine Swap: " <<
             (enable_swine_swap ? "Enabled" : "Disabled") <<
             "\nTime Trot: " <<
@@ -909,7 +909,7 @@ int main(int argc, char * argv[]) {
         // Windows only
 
         // change title of console, if possible
-        system((string("Title ") + NAME).c_str());
+        system((string("Title ") + APP_NAME).c_str());
 
         CreateDirectoryA(STORAGE_ROOT.c_str(), NULL);
 #else
@@ -919,7 +919,7 @@ int main(int argc, char * argv[]) {
 #endif    
 
         // Print greeting message
-        cout << "Welcome to Bacon Console v." << VERSION << "!\n(c) Alex Yu 2017" << endl;
+        cout << "Welcome to " << APP_NAME << " v." << VERSION << "!\n(c) Alex Yu 2017" << endl;
 
         // Enter console mode
         console_mode = true;

@@ -835,7 +835,7 @@ import (-i): add a new strategy from a file. Use the -f switch to specify import
 export (-e): export a strategy to a file. Use the -f switch parameter to specify output file path: bacon -o final -f final.strat \n\
 exportpy: export a strategy to a Python script that defines a function called 'strategy'.\n\
 clone (-c): clones an existing strategy and saves a cached copy of it to a new name.\n\
-remove (-r): remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies.\n\n\
+remove (-rm): remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies.\n\n\
 \
 --Logistics--\n\
 help (-h): display this help.\n\

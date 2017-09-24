@@ -178,50 +178,50 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
-| play (-p): |  simulate a game of Hog between two strategies (or play against one of them). |
-| tournament (-t): |  run a tournament with all the imported strategies. Use the -f switch to specify output file path: |  bacon -t -f output.txt |
+| play (-p) |  simulate a game of Hog between two strategies (or play against one of them). |
+| tournament (-t) |  run a tournament with all the imported strategies. Use the -f switch to specify output file path |  bacon -t -f output.txt |
 
 #### Learning
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
-| train (-l): |  start training against a specified strategy (improves the 'learn' strategy). |
-| learnfrom(-lf): |  sets the 'learn' strategy to a copy of the specified strategy. The 'train' command will now train this new strategy. |
+| train (-l) |  start training against a specified strategy (improves the 'learn' strategy). |
+| learnfrom(-lf) |  sets the 'learn' strategy to a copy of the specified strategy. The 'train' command will now train this new strategy. |
 
 #### Strategic Analysis
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
-| winrate (-r): |  get the theoretical win rate of a strategy against another one. |
-| avgwinrate: |  get the average win rate of a strategy against another one using sampling. |
-| winrate0 (-r0), winrate1 (-r1), avgwinrate0, avgwinrate1: |  force the first strategy to play as player #. |
-| mkfinal: |  re-compute the 'final' strategy; saves the result to the specified strategy name. |
-| mkrandom: |  creates a randomized strategy and saves the result to the specified strategy name. |
-| get (-s): |  see what a given strategy would roll at a given set of scores. |
-| diff (-d): |  get the differences in between two strategies. |
-| graph (-g): |  get a graphic representation of a strategy. |
-| graphdiff (-gd): |  get a graphic representation of the differences between two strategies. |
+| winrate (-r) |  get the theoretical win rate of a strategy against another one. |
+| avgwinrate |  get the average win rate of a strategy against another one using sampling. |
+| winrate0 (-r0), winrate1 (-r1), avgwinrate0, avgwinrate1 |  force the first strategy to play as player #. |
+| mkfinal |  re-compute the 'final' strategy; saves the result to the specified strategy name. |
+| mkrandom |  creates a randomized strategy and saves the result to the specified strategy name. |
+| get (-s) |  see what a given strategy would roll at a given set of scores. |
+| diff (-d) |  get the differences in between two strategies. |
+| graph (-g) |  get a graphic representation of a strategy. |
+| graphdiff (-gd) |  get a graphic representation of the differences between two strategies. |
 
 #### Strategy Manager
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
-| list (-ls): |  show a list of available strategies.  |
-| import (-i): |  add a new strategy from a file. Use the -f switch to specify import file path(s): |  bacon -i mystrategy -f a.strat |
-| export (-e): |  export a strategy to a file. Use the -f switch parameter to specify output file path: |  bacon -o final -f final.strat  |
-| exportpy: |  export a strategy to a Python script that defines a function called 'strategy'. |
-| clone (-c): |  clones an existing strategy and saves a cached copy of it to a new name. |
-| remove (-r): |  remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies. |
+| list (-ls) |  show a list of available strategies.  |
+| import (-i) |  add a new strategy from a file. Use the -f switch to specify import file path(s) |  bacon -i mystrategy -f a.strat |
+| export (-e) |  export a strategy to a file. Use the -f switch parameter to specify output file path |  bacon -o final -f final.strat  |
+| exportpy |  export a strategy to a Python script that defines a function called 'strategy'. |
+| clone (-c) |  clones an existing strategy and saves a cached copy of it to a new name. |
+| remove (-rm) |  remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies. |
 
 #### Logistics
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
-| help (-h): |  display this help. |
-| version (-v): |  display the version number. |
-| option (-o): |  adjust options (turn on/off Swine Swap, Time Trot). |
-| time: |  measure the runtime of any bacon command. |
-| exit: |  get out of here!	
+| help (-h) |  display this help. |
+| version (-v) |  display the version number. |
+| option (-o) |  adjust options (turn on/off Swine Swap, Time Trot). |
+| time |  measure the runtime of any bacon command. |
+| exit |  get out of here!	
 
 ### List of built-in strategies
 

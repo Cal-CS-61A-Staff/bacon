@@ -287,8 +287,6 @@ void exec(string cmd){
                 contestants.push_back(make_pair(name, strat[name]));
         }
 
-        random_shuffle(contestants.begin(), contestants.end());
-
         size_t total_strats = contestants.size();
         int total_games = (int)total_strats * ((int)total_strats - 1) / 2;
 

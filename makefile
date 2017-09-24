@@ -13,6 +13,7 @@ OBJ = $(patsubst %,$(ODIR)/%, $(_OBJ))
 OUTPUTNAME = bacon
 OUTPUTDIR = bin/
 HOGCONV = hogconv.py
+HOGCONVBIN = hogconv
 
 $(ODIR)/%.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -31,9 +32,13 @@ clean :
 	rm -f bin/*.ilk
 	
 install:
+	rm -f /usr/bin/$(OUTPUTNAME)
 	cp $(OUTPUTDIR)$(OUTPUTNAME) /usr/bin
-	cp $(HOGCONV) /usr/bin
+	cp $(HOGCONV) /usr/bin/$(HOGCONVBIN)
+	chmod +x /usr/bin/$(HOGCONV)
 
 install_user:
+	rm -f ~/bin/$(OUTPUTNAME)
 	cp $(OUTPUTDIR)$(OUTPUTNAME) ~/bin
-	cp $(HOGCONV) ~/bin
+	cp $(HOGCONV) ~/bin/$(HOGCONVBIN)
+	chmod +x ~/bin/$(HOGCONVBIN)

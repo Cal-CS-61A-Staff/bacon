@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import os, sys, importlib.util
+import os, sys, imp
 
 GOAL = 100
 FUNCTION_NAME = 'final_strategy'
@@ -15,10 +15,7 @@ def convert(file):
     # import module
     module_name = os.path.basename(module_path)
     
-    spec = importlib.util.spec_from_file_location(module_name, file)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-
+    module = imp.load_source(module_name, file)
     strat = getattr(module, FUNCTION_NAME)
     
     try:
@@ -87,11 +84,12 @@ for i in range(1, len(sys.argv)):
         print ("can't access", path + ", skipping...")  
     
 if len(sys.argv) <= 1:
-    print ("""\nusage: python3 cache.py [-o output_dir] [file1] [file2]\n
+    print ("""\nusage: python3 hogconv.py [-o output_dir] [file1] [file2]\n
 Converts each python strategy file to a strategy file with extension .strat.
 Saves resulting files to the current directory by default. Use -o to specify a different directory.\n""")
     
 else:
     print ("\nconverted a total of", count, ("strategies." if count != 1 else "strategy.")) 
-        
-    
+    print ("\ntips: run 'bacon -i -f", (out_dir + "/*'" if out_dir else "*'"), "to import the converted strategies into hog.")
+    print ("after strategies have been imported, run 'bacon -t [num_threads] [-f output_path]' to run tournament.")
+    print ("to clear all imported strategies, use 'bacon -rm all'.")

@@ -11,7 +11,7 @@
 using namespace std;
 
 // The program's version number
-const char * VERSION = "1.3.1.41";
+const char * VERSION = "1.3.2.43";
 
 // The program name
 const char * NAME = "Bacon Console";
@@ -105,7 +105,11 @@ inline void ask_for_path(char * c, int len = 256) {
         output_paths.pop_back();
     }
     else {
-        if (console_mode) cin.ignore();
+#ifdef _WIN32
+        if (console_mode) 
+#endif
+			cin.ignore();
+			
         cin.getline(c, 256);
     }
 }
@@ -240,7 +244,7 @@ play (-p) \t\t tournament (-t [-f]) \t train (-l) \t\t learnfrom (-lf) \n\
 winrate[0|1] (-r[0|1])\t avgwinrate[0|1]\t mkfinal \t\t mkrandom\n\
 get (-s) \t\t diff (-d) \t\t graph (-g) \t\t graphdiff (-gd) \n\
 list (-l) \t\t import (-i [-f]) \t export[py] (-e [-f]) \t clone (-c)\n\
-remove (-r) \t\t help (-h) \t\t version (-v) \t\t option (-o) \t\t\n\
+remove (-rm) \t\t help (-h) \t\t version (-v) \t\t option (-o) \t\t\n\
 \t\t\t\t\t\t time \t\t\t exit" << endl << endl;
 }
 
@@ -288,6 +292,13 @@ void exec(string cmd){
         cout << "Number of strategies: " << total_strats << "\n";
         cout << "Total games to play: " << total_games << "\n";
 
+		if (output_paths.size() == 0) cout << "\nNumber of threads:" << endl;
+		
+		int thds = 4;
+		read_token(thds);
+		
+		if (thds <= 0) thds = 4;
+		
         if (output_paths.size() == 0) cout << "\nFile to save results to when done:" << endl;
 
         char path[256];
@@ -305,7 +316,7 @@ void exec(string cmd){
         cout << "Running tournament..." << endl;
 
         vector<pair<int, string> *> results = 
-            round_robin(contestants, announcer, 50, 0.500001, 4, &interrupt);
+            round_robin(contestants, announcer, 50, 0.500001, thds, &interrupt);
 
         if (interrupt) 
             cout << "\nTournament interrupted by user. Incomplete results:\n\n";
@@ -328,7 +339,9 @@ void exec(string cmd){
 
             if (!interrupt) 
                 save_ofs << rank <<  ". " << results[i]->second << " with " << results[i]->first << " wins \n";
+        }
 
+        for (unsigned i = 0; i < results.size(); ++i) {
             delete results[i];
         }
 
@@ -613,7 +626,7 @@ void exec(string cmd){
         }
     }
 
-    else if (cmd == "-r" || cmd == "remove") {
+    else if (cmd == "-rm" || cmd == "remove") {
 
         string name;
         while (true) {
@@ -636,16 +649,33 @@ void exec(string cmd){
             read_token(name);
 
             if (name == "cancel") break;
-
+			
             auto it = extra_strats.find(name);
-            if (it != extra_strats.end()) {
-                // found!
-                extra_strats.erase(it);
-                delete strat[name];
-                strat.erase(name);
+			bool erase_all = (it == extra_strats.end()) && (name == "all");
+			
+            if (it != extra_strats.end() || erase_all) {
+				if (erase_all){
+					// erase all
+					for (auto name : extra_strats){
+						delete strat[name];
+						strat.erase(name);
+					}
+					
+					extra_strats.clear();
+				}
+				else{	
+					// found single match
+					extra_strats.erase(it);
+					delete strat[name];
+					strat.erase(name);
+				}
 
                 write_exts(EXT_PATH);
-                cout << "Strategy removed.\n";
+				
+				if (erase_all)
+					cout << "All imported strategies removed.\n";
+				else
+					cout << "Strategy removed.\n";
 
                 if (builtin_strats.find(name) != builtin_strats.end()) {
                     strat[name] = builtin_strats[name]; // reset internal strategy w/ the name
@@ -805,7 +835,7 @@ import (-i): add a new strategy from a file. Use the -f switch to specify import
 export (-e): export a strategy to a file. Use the -f switch parameter to specify output file path: bacon -o final -f final.strat \n\
 exportpy: export a strategy to a Python script that defines a function called 'strategy'.\n\
 clone (-c): clones an existing strategy and saves a cached copy of it to a new name.\n\
-remove (-r): remove an imported strategy and restore an internal strategy, if available.\n\n\
+remove (-r): remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies.\n\n\
 \
 --Logistics--\n\
 help (-h): display this help.\n\

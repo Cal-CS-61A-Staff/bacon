@@ -9,8 +9,6 @@
     // The default number of samples for sampling the win rate (not used for absolute win rate calculation)
     const int DEFAULT_WR_SAMPLES = 10000;
 
-    const int MAX_THREADS = 4;
-
     // ** Learning **
 
     /* A strategy that improves by using simple machine learning.

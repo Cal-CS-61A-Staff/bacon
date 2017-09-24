@@ -433,7 +433,12 @@ MatrixStrategy * create_final_strat(bool quiet) {
 
 // *** Win rate computations ***
 
-double dp[MAX_THREADS][GOAL][GOAL][2][MOD_TROT][2]; // storage for win rate computation DP
+struct state{
+    double val[GOAL][GOAL][2][MOD_TROT][2]; // storage for win rate computation DP
+
+};
+
+vector<state> dp(1);
 
 /* Recursively computes win rate of one strategy against another at a set of scores (memoized)
 
@@ -453,7 +458,7 @@ double dp[MAX_THREADS][GOAL][GOAL][2][MOD_TROT][2]; // storage for win rate comp
 double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
             int who, int turn, int trot, int t_id) {
 
-    if (dp[t_id][score][oppo_scoe][who][turn][trot] == -1.0) {
+    if (dp[t_id].val[score][oppo_scoe][who][turn][trot] == -1.0) {
 
         int r = strat(score, oppo_scoe);
         
@@ -522,10 +527,10 @@ double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int s
 
         wr /= total_times_score_counted;
 
-        dp[t_id][score][oppo_scoe][who][turn][trot] = wr;
+        dp[t_id].val[score][oppo_scoe][who][turn][trot] = wr;
     }
 
-    return dp[t_id][score][oppo_scoe][who][turn][trot];
+    return dp[t_id].val[score][oppo_scoe][who][turn][trot];
 }
 
 double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
@@ -535,7 +540,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     if (!perms_computed) compute_perms();
 
     // init dp array
-    fill(dp[thread_id][0][0][0][0], dp[thread_id][0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
+    fill(dp[thread_id].val[0][0][0][0], dp[thread_id].val[0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
 
     double total = 0.0, samp = 0.0;
 
@@ -543,7 +548,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
         total += compute_average_win_rate(strategy0, strategy1, score0, score1, 0,
             starting_turn, enable_time_trot, thread_id);
 
-        fill(dp[thread_id][0][0][0][0], dp[thread_id][0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
+        fill(dp[thread_id].val[0][0][0][0], dp[thread_id].val[0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
         ++ samp;
     }
 
@@ -616,7 +621,7 @@ void round_robin_coroutine(vector<pair<string, IStrategy *> > strats,
         int * high, int * high_strat, vector<pair<int,string> *> victories, int * games_played,
         int jbase, int jdelta) {
 
-    unsigned N = strats.size();
+    unsigned N = (unsigned)strats.size();
     int total_games = N * (N - 1) / 2;
 
     for (unsigned i = 0; i < N; ++i){
@@ -682,6 +687,8 @@ vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strat
     vector<thread *> threadmgr;
     threadmgr.reserve(threads);
 
+    dp.resize(threads);
+
     announcer_lock = false;
 
     for (int i = 0; i < threads; ++i) {
@@ -700,6 +707,8 @@ vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strat
             delete th;
         }
     }
+
+    dp.resize(1);
 
     sort(victories.begin(), victories.end(), wins_comparer);
 

@@ -35,7 +35,7 @@ install:
 	rm -f /usr/bin/$(OUTPUTNAME)
 	cp $(OUTPUTDIR)$(OUTPUTNAME) /usr/bin
 	cp $(HOGCONV) /usr/bin/$(HOGCONVBIN)
-	chmod +x /usr/bin/$(HOGCONV)
+	chmod +x /usr/bin/$(HOGCONVBIN)
 
 install_user:
 	rm -f ~/bin/$(OUTPUTNAME)

@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 import os, sys, importlib.util
 
 GOAL = 100
@@ -37,8 +38,8 @@ def convert(file):
         output_names[output_name] = 1
         full_output_name = output_name + '.strat'
 
-	if out_dir:	os.makedirs(out_dir, exist_ok = True)
-	
+    if out_dir: os.makedirs(out_dir, exist_ok = True)
+    
     out = open(os.path.join(out_dir, full_output_name), 'w')
     
     for i in range(GOAL):

@@ -78,7 +78,7 @@
        and the second is the name of the player */
     vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *>> strats,
         void announcer(int games_played, int games_remaining, int high, string high_strat) = NULL,
-        int announcer_interval = 50,
+        int announcer_interval = 100,
         double margin = 0.500001, int threads = 4, volatile int * interrupt = NULL);
 
     // Compute the "final" strategy using DP

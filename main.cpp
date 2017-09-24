@@ -248,11 +248,13 @@ remove (-rm) \t\t help (-h) \t\t version (-v) \t\t option (-o) \t\t\n\
 \t\t\t\t\t\t time \t\t\t exit" << endl << endl;
 }
 
+// Announcer for round robin tournament
 void announcer(int games_played, int games_remaining, int high, string high_strat) {
     cout << games_played << " games played, " << games_remaining <<
-        " remaining. '" << high_strat << "' is leading with " << high << " wins.\n";
+        " remaining. '" << high_strat << "' is leading with " << high << " wins." << endl;
 }
 
+// Execute Bacon command cmd
 void exec(string cmd){
     // cancel any interrupts
     interrupt = 0;
@@ -316,7 +318,7 @@ void exec(string cmd){
         cout << "Running tournament..." << endl;
 
         vector<pair<int, string> *> results = 
-            round_robin(contestants, announcer, 50, 0.500001, thds, &interrupt);
+            round_robin(contestants, announcer, 100, 0.500001, thds, &interrupt);
 
         if (interrupt) 
             cout << "\nTournament interrupted by user. Incomplete results:\n\n";

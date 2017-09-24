@@ -12,6 +12,7 @@ OBJ = $(patsubst %,$(ODIR)/%, $(_OBJ))
 
 OUTPUTNAME = bacon
 OUTPUTDIR = bin/
+HOGCONV = hogconv.py
 
 $(ODIR)/%.o: %.cpp $(DEPS)
 	$(CC) -c -o $@ $< $(CFLAGS)
@@ -31,7 +32,8 @@ clean :
 	
 install:
 	cp $(OUTPUTDIR)$(OUTPUTNAME) /usr/bin
+	cp $(HOGCONV) /usr/bin
 
 install_user:
 	cp $(OUTPUTDIR)$(OUTPUTNAME) ~/bin
-	
+	cp $(HOGCONV) ~/bin

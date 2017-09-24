@@ -6,7 +6,7 @@
 Bacon is an an analysis program for Hog, a dice game from the 
 CS61A class project [Hog](https://cs61a.org/proj/hog/). Bacon was created for the [Hog Contest](https://cs61a.org/proj/hog_contest/), which is a Hog strategy contest students are encouraged to participate in.
 
-Bacon may be used by students to construct and test strategies, or by instructors to run contests. The system is designed to be highly efficient and a vast improvement over the old Hog Contest calculations.
+Bacon may be used by students to construct and test strategies, or by instructors to run contests. The system is designed to be highly efficient and a vast improvement over the old system used to run the Hog Contest.
 
 The core portion of Bacon is written entirely in C++ and is highly optimized. 
 On average, the computation of the exact theoretical winrate between two strategies takes approximately 100 milliseconds.

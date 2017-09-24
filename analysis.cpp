@@ -126,7 +126,8 @@ pair<int, int> LearningStrategy::next_focus(pair<int, int> focus) {
     return focus;
 }
 
-// computes the number of ways to get each number by rolling each number of dice. complexity n^2 * m
+/* Part of the final strategy implementation.
+computes the number of ways to get each number by rolling each number of dice. complexity n^2 * m*/
 void compute_perms() {
     memset(total_roll_perms_for_sum, 0, sizeof total_roll_perms_for_sum);
     memset(prob_any_roll_sum, 0, sizeof prob_any_roll_sum);
@@ -193,7 +194,9 @@ void compute_perms() {
 
 double prob_full_turn_num_at_score[MAX_TURNS + 1][GOAL][GOAL];
 
-// complexity 2 * n^4 = O(n^4)
+/*
+Part of the final strategy implementation
+Computes the probability of being on a certain time trot turn number at each score. O(n^4) */
 void compute_prob_turn_num_at_score() {
     // keep track of total probability so we can divide by this to find real probability
 
@@ -269,7 +272,10 @@ void compute_prob_turn_num_at_score() {
     turn_num_computed = true;
 }
 
-/* Due to special properties of the scores (i.e. the same score cannot occur twice in a game)
+/* Part of the final strategy implementation
+   Note: this is NOT the procedure for calculating the exact win rate. Look for compute_average_win_rate.
+   
+   Due to special properties of the scores (i.e. the same score cannot occur twice in a game)
    this function may be memoized. However, bottom-up dp is very difficult to write.
 
    Time complexity: O(N^2 * M^2) where N is the goal score, and M is the max # rolls. 
@@ -401,14 +407,6 @@ MatrixStrategy * create_final_strat(bool quiet) {
     if (!quiet)
         cout << "Preparing 2/2...\n\nComputing strategy..." << endl;
 
-
-    //for (int t = 1; t <= 10; ++t) {
-    //    for (int i = 0; i < 61; ++i) {
-    //        cerr << total_roll_perms_for_sum[t][i] << " ";
-    //    }
-    //    cerr << endl << endl;
-    //}
-
     // make a CachedStrategy in the heap to store our strategy matrix. We will return this at the end.
     MatrixStrategy * opt_strat = new MatrixStrategy();
 
@@ -433,17 +431,41 @@ MatrixStrategy * create_final_strat(bool quiet) {
 
 // *** Win rate computations ***
 
-struct state{
-    double val[GOAL][GOAL][2][MOD_TROT][2]; // storage for win rate computation DP
+class State{
+	
+public:
 
+	double * val; // storage for win rate computation DP	
+	
+	const int SIZE = GOAL * GOAL * 2 * MOD_TROT * 2;
+	
+	double * operator() (int score, int oppo_score, int who, int turn, int trot){
+		int index = score * GOAL * 2 * MOD_TROT * 2 + oppo_score * 2 * MOD_TROT * 2 +
+					who * MOD_TROT * 2 + turn * 2 + trot;
+					
+		return & val[index];
+	}
+	
+	State(){
+		val = new double [ SIZE ];
+	}
+
+	State(const State &obj){
+		val = new double [ SIZE ];
+	}
+	
+	~State(){
+		delete[] val;
+	}
 };
 
-vector<state> dp(1);
+vector<State> dp(1);
 
 /* Recursively computes win rate of one strategy against another at a set of scores (memoized)
 
    Params:
    strat, oppo_strat: keeps track of players' strategies (not part of the state)
+   t_id: thread id. Item of the DP vector to use for storage. This is to enable multithreading.
 
    Params (the DP state):
    score, oppo_score: score of the players
@@ -458,7 +480,7 @@ vector<state> dp(1);
 double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
             int who, int turn, int trot, int t_id) {
 
-    if (dp[t_id].val[score][oppo_scoe][who][turn][trot] == -1.0) {
+    if ((*dp[t_id](score, oppo_scoe, who, turn, trot)) == -1.0) {
 
         int r = strat(score, oppo_scoe);
         
@@ -527,10 +549,10 @@ double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int s
 
         wr /= total_times_score_counted;
 
-        dp[t_id].val[score][oppo_scoe][who][turn][trot] = wr;
+        (*dp[t_id](score, oppo_scoe, who, turn, trot)) = wr;
     }
 
-    return dp[t_id].val[score][oppo_scoe][who][turn][trot];
+    return (*dp[t_id](score, oppo_scoe, who, turn, trot));
 }
 
 double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
@@ -540,7 +562,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     if (!perms_computed) compute_perms();
 
     // init dp array
-    fill(dp[thread_id].val[0][0][0][0], dp[thread_id].val[0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
+    fill(dp[thread_id].val, dp[thread_id].val + dp[thread_id].SIZE, -1.0);
 
     double total = 0.0, samp = 0.0;
 
@@ -548,7 +570,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
         total += compute_average_win_rate(strategy0, strategy1, score0, score1, 0,
             starting_turn, enable_time_trot, thread_id);
 
-        fill(dp[thread_id].val[0][0][0][0], dp[thread_id].val[0][0][0][0] + GOAL * GOAL * 2 * MOD_TROT * 2, -1.0);
+        fill(dp[thread_id].val, dp[thread_id].val + dp[thread_id].SIZE, -1.0);
         ++ samp;
     }
 
@@ -672,7 +694,7 @@ vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strat
     void announcer(int games_played, int games_remaining, int high, string high_strat),
     int announcer_interval, double margin, int threads, volatile int * interrupt){
 
-    unsigned N = strats.size();
+    size_t N = strats.size();
     int high = 0, high_strat = 0;
 
     vector<pair<int,string> *> victories(N);
@@ -681,7 +703,7 @@ vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strat
         victories[i] = new pair<int, string>(0, strats[i].first);
     }
 
-    int total_games = N * (N - 1) / 2;
+    int total_games = (int)N * ((int)N - 1) / 2;
     int games_played = 0;
 
     vector<thread *> threadmgr;

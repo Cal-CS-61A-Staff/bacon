@@ -1,6 +1,7 @@
 #pragma once
 
 #define _PRE_COMPILE_
+#define _CRT_SECURE_NO_WARNINGS
 #include<cstdarg>
 #include<iostream>
 #include<iomanip>

@@ -46,5 +46,5 @@ public:
     }
 };
 
-extern FairDice DEFAULT_DICE, FOUR_SIDED;
+extern FairDice DEFAULT_DICE;
 #endif

@@ -285,8 +285,8 @@ void exec(string cmd){
                 contestants.push_back(make_pair(name, strat[name]));
         }
 
-        int total_strats = contestants.size();
-        int total_games = total_strats * (total_strats - 1) / 2;
+        size_t total_strats = contestants.size();
+        int total_games = (int)total_strats * ((int)total_strats - 1) / 2;
 
 
         cout << "Number of strategies: " << total_strats << "\n";
@@ -589,11 +589,11 @@ void exec(string cmd){
             string name;
             if (!single_mode) {
                 name = string(path);
-                int pos = name.find_last_of("\\/");
+
+                size_t pos = name.find_last_of("\\/");
                 if (pos != name.npos) name = name.substr(pos + 1);
 
-                int pos2 = name.find_last_of('.');
-
+                size_t pos2 = name.find_last_of('.');
                 if (pos2 != name.npos) name = name.substr(0, pos2);
             }
 
@@ -902,6 +902,9 @@ int main(int argc, char * argv[]) {
 
         string cmd;
 
+		// speed up cin
+		cin.sync_with_stdio(0);
+		
 #ifdef _WIN32
         // Windows only
 
@@ -910,8 +913,6 @@ int main(int argc, char * argv[]) {
 
         CreateDirectoryA(STORAGE_ROOT.c_str(), NULL);
 #else
-		// speed up cin
-		cin.sync_with_stdio(0);
 	
         // make the storage directory, if possible
         system((string("mkdir -p ") + STORAGE_ROOT).c_str());

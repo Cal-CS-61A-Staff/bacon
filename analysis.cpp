@@ -431,35 +431,55 @@ MatrixStrategy * create_final_strat(bool quiet) {
 
 // *** Win rate computations ***
 
-class State{
+// storage for win rate computation DP	
+class WinRateStorage{
 	
-public:
-
-	double * val; // storage for win rate computation DP	
-	
+public:	
 	const int SIZE = GOAL * GOAL * 2 * MOD_TROT * 2;
 	
-	double * operator() (int score, int oppo_score, int who, int turn, int trot){
-		int index = score * GOAL * 2 * MOD_TROT * 2 + oppo_score * 2 * MOD_TROT * 2 +
-					who * MOD_TROT * 2 + turn * 2 + trot;
-					
-		return & val[index];
+    // get the value stored for a specified state
+	double get(int score, int oppo_score, int who, int turn, int trot){
+        return val[index(score, oppo_score, who, turn, trot)];
 	}
-	
-	State(){
+
+    // set the value stored for a specified state to 'value'
+	void set(int score, int oppo_score, int who, int turn, int trot, double value){
+		val[index(score, oppo_score, who, turn, trot)] = value;
+	}
+
+    // set all values to -1 in preparation for a new win rate calculation
+    void clear(void) {
+        fill(val, val + SIZE, -1.0);
+    }
+
+    // Default constructor, allocates space for state array
+	WinRateStorage(void){
 		val = new double [ SIZE ];
 	}
 
-	State(const State &obj){
+    /* Copy constructor does NOT actually copy the old array.
+       Definined like this to make vector.resize work. */
+	WinRateStorage(const WinRateStorage &obj){
 		val = new double [ SIZE ];
 	}
 	
-	~State(){
+    // Frees space taken by state array
+	~WinRateStorage(void){
 		delete[] val;
 	}
+
+private:
+
+	double * val; 
+
+    static inline int index(int score, int oppo_score, int who, int turn, int trot) {
+        return score * GOAL * 2 * MOD_TROT * 2 + oppo_score * 2 * MOD_TROT * 2 +
+            who * MOD_TROT * 2 + turn * 2 + trot;
+    }
+
 };
 
-vector<State> dp(1);
+vector<WinRateStorage> dp(1);
 
 /* Recursively computes win rate of one strategy against another at a set of scores (memoized)
 
@@ -480,7 +500,7 @@ vector<State> dp(1);
 double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
             int who, int turn, int trot, int t_id) {
 
-    if ((*dp[t_id](score, oppo_scoe, who, turn, trot)) == -1.0) {
+    if (dp[t_id].get(score, oppo_scoe, who, turn, trot) == -1.0) {
 
         int r = strat(score, oppo_scoe);
         
@@ -549,10 +569,10 @@ double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int s
 
         wr /= total_times_score_counted;
 
-        (*dp[t_id](score, oppo_scoe, who, turn, trot)) = wr;
+        dp[t_id].set(score, oppo_scoe, who, turn, trot, wr);
     }
 
-    return (*dp[t_id](score, oppo_scoe, who, turn, trot));
+    return dp[t_id].get(score, oppo_scoe, who, turn, trot);
 }
 
 double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
@@ -562,7 +582,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     if (!perms_computed) compute_perms();
 
     // init dp array
-    fill(dp[thread_id].val, dp[thread_id].val + dp[thread_id].SIZE, -1.0);
+    dp[thread_id].clear();
 
     double total = 0.0, samp = 0.0;
 
@@ -570,7 +590,8 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
         total += compute_average_win_rate(strategy0, strategy1, score0, score1, 0,
             starting_turn, enable_time_trot, thread_id);
 
-        fill(dp[thread_id].val, dp[thread_id].val + dp[thread_id].SIZE, -1.0);
+        // init dp array
+        dp[thread_id].clear();
         ++ samp;
     }
 

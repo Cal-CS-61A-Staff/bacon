@@ -715,6 +715,7 @@ vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strat
     void announcer(int games_played, int games_remaining, int high, string high_strat),
     int announcer_interval, double margin, int threads, volatile int * interrupt){
 
+    // Compute permutations beforehand to prevent conflict between threads
     if (!perms_computed) compute_perms();
 
     size_t N = strats.size();

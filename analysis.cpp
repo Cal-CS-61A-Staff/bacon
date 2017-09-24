@@ -435,20 +435,20 @@ MatrixStrategy * create_final_strat(bool quiet) {
 class WinRateStorage{
 	
 public:	
-	const int SIZE = GOAL * GOAL * 2 * MOD_TROT * 2;
+	const static int SIZE = GOAL * GOAL * 2 * MOD_TROT * 2;
 	
     // get the value stored for a specified state
-	double get(int score, int oppo_score, int who, int turn, int trot){
+	inline double get(int score, int oppo_score, int who, int turn, int trot){
         return val[index(score, oppo_score, who, turn, trot)];
 	}
 
     // set the value stored for a specified state to 'value'
-	void set(int score, int oppo_score, int who, int turn, int trot, double value){
+	inline void set(int score, int oppo_score, int who, int turn, int trot, double value){
 		val[index(score, oppo_score, who, turn, trot)] = value;
 	}
 
     // set all values to -1 in preparation for a new win rate calculation
-    void clear(void) {
+    inline void clear(void) {
         fill(val, val + SIZE, -1.0);
     }
 

@@ -287,6 +287,8 @@ void exec(string cmd){
                 contestants.push_back(make_pair(name, strat[name]));
         }
 
+        random_shuffle(contestants.begin(), contestants.end());
+
         size_t total_strats = contestants.size();
         int total_games = (int)total_strats * ((int)total_strats - 1) / 2;
 
@@ -308,13 +310,6 @@ void exec(string cmd){
 
         cout << endl;
 
-        ofstream save_ofs(path);
-        if (!save_ofs) {
-            cout << "Could not access the specified path. Please check if the path is correct and if "
-                "the file is being used.\n";
-            return;
-        }
-
         cout << "Running tournament..." << endl;
 
         vector<pair<int, string> *> results = 
@@ -327,6 +322,19 @@ void exec(string cmd){
 
 
         int rank = 1, ties = 0;
+
+        
+        ofstream save_ofs;
+
+        if (!interrupt) {
+            save_ofs.open(path, ofstream::out | ofstream::trunc);
+            if (save_ofs.fail() || !save_ofs.is_open()) {
+                cout << "Could not access the specified path. Please check if the path is correct and if "
+                    "the file is being used. Results will be saved to results.txt in the current directory.\n";
+                save_ofs.clear();
+                save_ofs.open(path, ofstream::out | ofstream::trunc);
+            }
+        }
 
         for (unsigned i = 0; i < results.size(); ++i) {
             if (i && results[i]->first < results[i - 1]->first) {

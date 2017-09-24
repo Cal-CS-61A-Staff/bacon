@@ -69,7 +69,7 @@ Build the project by navigating to `Build > Build Solution`. The output file sho
 Alternatively, download and install [MinGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) and [Make](http://gnuwin32.sourceforge.net/packages/make.htm) for Windows.
 
 Then just like with Linux/Mac, `cd` into the `bacon` directory and enter `make`. 
-Do not use `make install` however. Instead, simply copy the `bacon.exe` file inside `bin/` and `hogconv.py` inside the root directory to somewhere convenient and run them.
+Do not use `make install` however. Instead, simply copy the `bacon.exe` file inside the `bin/` directory and `hogconv.py` inside the root directory to somewhere convenient and run them.
 
 
 ## bacon: Usage
@@ -77,7 +77,7 @@ Do not use `make install` however. Instead, simply copy the `bacon.exe` file ins
 
 ### Usage from System Shell
 
-Bacon may be used directly from the system shell by directly passing arguments to the `bacon` binary.
+Bacon may be used from the system shell by directly passing arguments to the `bacon` binary.
 
 For example, to compute win rate, you would type:
 ```sh

@@ -99,6 +99,11 @@ Or play against one of the strategies yourself using the `human` built-in strate
 bacon -p human final
 ```
 
+To obtain a list of all the strategies, use:
+```sh
+bacon -ls
+```
+
 #### Other cool things you can do:
 
 Draw a diagram of a strategy (must use appropriate monospaced font):
@@ -217,6 +222,24 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 | option (-o): |  adjust options (turn on/off Swine Swap, Time Trot). |
 | time: |  measure the runtime of any bacon command. |
 | exit: |  get out of here!	
+
+### List of built-in strategies
+
+`human`: Play as human. Use this to play against your strategies for fun.
+
+`default`: Always rolls 4. The baseline strategy.
+
+`random`: Roll a random number of dice at each round (not legal in contest, but useful for testing). You may create a random, but fixed, strategy for analysis using `mkrandom`.
+
+`swap`: The 'swap' strategy. Students implemented this as part of the Hog project. Applies Free Bacon and Swine Swap where beneficial.
+
+`final`: The 'final' strategy calculated using DP. this was my initial submission in the Hog Contest. Useful as a benchmark. Note that this is not actually a built-in strategy and may be removed. To recompute it, use `mkfinal`.
+
+`always0` ... `always10`: Always rolls n dice.
+
+`swap_visual`: Not a real strategy, but may be used with `-g`: `bacon -g swap_visual` to visualize the density of Swine Swap across the universe of all scores.
+
+`learn`: A special strategy which will learn and improve through training. Run the `train` command to train this strategy against another strategy. You may also run `learnfrom` to override `learn` with another strategy from which training will start.
 
 ## hogconv: Usage
 

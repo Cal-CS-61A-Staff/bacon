@@ -73,18 +73,29 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);include\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);include\</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <TargetName>bacon</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);include/</IncludePath>
+    <TargetName>$(ProjectName)</TargetName>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);include\</IncludePath>
     <SourcePath>$(VC_SourcePath)</SourcePath>
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
+    <OutDir>bin\</OutDir>
+    <IntDir>obj\</IntDir>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);include\</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

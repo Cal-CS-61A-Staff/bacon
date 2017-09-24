@@ -21,7 +21,7 @@ def convert(file):
     try:
         output_name = getattr(module, TEAM_NAME_VAR)
     except:
-        print("WARNING: ", file, "does not specify", TEAM_NAME_VAR + ". Using module name as team name...")
+        print ("WARNING: " + file + " does not specify " + TEAM_NAME_VAR + ". Using module name as team name...")
         output_name = module_name
     
     # avoid duplication
@@ -48,7 +48,7 @@ def convert(file):
     out.flush()
     out.close()
     
-    print ("converted:", file)
+    print ("converted: " + file)
     
     return 1
     
@@ -81,7 +81,7 @@ for i in range(1, len(sys.argv)):
             count += convert(path)
             
     else:
-        print ("can't access", path + ", skipping...")  
+        print ("can't access " + path + ", skipping...")  
     
 if len(sys.argv) <= 1:
     print ("""\nusage: python3 hogconv.py [-o output_dir] [file1] [file2]\n
@@ -89,7 +89,7 @@ Converts each python strategy file to a strategy file with extension .strat.
 Saves resulting files to the current directory by default. Use -o to specify a different directory.\n""")
     
 else:
-    print ("\nconverted a total of", count, ("strategies." if count != 1 else "strategy.")) 
-    print ("\ntips: run 'bacon -i -f", (out_dir + "/*'" if out_dir else "*'"), "to import the converted strategies into hog.")
+    print ("\nconverted a total of " + str(count) + (" strategies." if count != 1 else " strategy."))
+    print ("\ntips: run 'bacon -i -f" + (out_dir + "/*'" if out_dir else "*'") + "to import the converted strategies into hog.")
     print ("after strategies have been imported, run 'bacon -t [num_threads] [-f output_path]' to run tournament.")
     print ("to clear all imported strategies, use 'bacon -rm all'.")

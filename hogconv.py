@@ -1,30 +1,55 @@
 #!/usr/bin/python3
 import os, sys, imp
 
-GOAL = 100
-FUNCTION_NAME = 'final_strategy'
-TEAM_NAME_VAR = 'TEAM_NAME' # the variable that decides the output name of the function
+GOAL = 100 # goal score for Hog
+
+STRATEGY_FUNC_ATTR = 'final_strategy' # attribute of student's module that contains the strategy function
+TEAM_NAME_ATTR = 'TEAM_NAME' # attribute of student's module that contains the team name
+
+TEAM_NAME_MAX_LEN = 50 # max length for team names
+DEF_EMPTY_TEAM_NAME = "(empty string)" # name for teams with an empty team name
+DEF_LONG_TEAM_NAME = "(team name longer than 50 chars)" # name for teams with team names that are too long
 
 count, out_dir, out_sw = 0, '', False
 
+# dict of names, used to check for duplicate team names
 output_names = {}
 
-def convert(file):
-    module_path = file[:-3]
+def convert(file):  
+    module_path = file[:-3] # cut off .py
     
-    # import module
-    module_name = os.path.basename(module_path)
+    module_dir, module_name = os.path.split(module_path)
     
+    # make sure module's dependencies work
+    sys.path[-1] = module_dir
+    
+    # import module 
     module = imp.load_source(module_name, file)
-    strat = getattr(module, FUNCTION_NAME)
     
     try:
-        output_name = getattr(module, TEAM_NAME_VAR)
+        strat = getattr(module, STRATEGY_FUNC_ATTR)
     except:
-        print ("WARNING: " + file + " does not specify " + TEAM_NAME_VAR + ". Using module name as team name...")
+        print (file + " has no attribute " + STRATEGY_FUNC_ATTR + " , skipping...") 
+        return 0
+    
+    try:
+        output_name = getattr(module, TEAM_NAME_ATTR)
+    except:
+        print ("WARNING: " + file + " does not specify " + TEAM_NAME_ATTR + ". Using module name as team name...")
         output_name = module_name
     
-    # avoid duplication
+    # check for empty team names
+    if not output_name:
+        print ("WARNING: " + file + " has an empty team name. Setting team name to " + DEF_EMPTY_TEAM_NAME + "...")
+        output_name = DEF_EMPTY_TEAM_NAME
+        
+    # check for team names that are too long
+    if len(output_name) > TEAM_NAME_MAX_LEN:
+        print ("WARNING: " + file + " has a team name longer than " + TEAM_NAME_MAX_LEN + 
+               " chars. Setting team name to " + DEF_LONG_TEAM_NAME + "...")
+        output_name = DEF_LONG_TEAM_NAME
+    
+    # check for duplicate team names
     if output_name in output_names:
         full_output_name = output_name + "__" + str(output_names[output_name]) + '.strat'
         output_names[output_name] += 1
@@ -35,10 +60,16 @@ def convert(file):
         output_names[output_name] = 1
         full_output_name = output_name + '.strat'
 
-    if out_dir: os.makedirs(out_dir, exist_ok = True)
+    # make sure output directories exist
+    if out_dir: 
+        try:
+            os.makedirs(out_dir)
+        except:
+            pass
     
     out = open(os.path.join(out_dir, full_output_name), 'w')
     
+    # write out new strategy
     for i in range(GOAL):
         for j in range(GOAL):
             if j: out.write(' ')
@@ -50,7 +81,7 @@ def convert(file):
     
     print ("converted: " + file)
     
-    return 1
+    return 1 # useful for counting
     
 
 def convert_dir(dir = os.path.dirname(__file__)):
@@ -61,6 +92,11 @@ def convert_dir(dir = os.path.dirname(__file__)):
         count += convert(file, count)
     
     return count
+        
+# add an empty entry to sys.path so that we can add dependencies for each student module
+sys.path.append('')
+
+print ('')
         
 for i in range(1, len(sys.argv)):
     path = sys.argv[i]
@@ -84,12 +120,13 @@ for i in range(1, len(sys.argv)):
         print ("can't access " + path + ", skipping...")  
     
 if len(sys.argv) <= 1:
-    print ("""\nusage: python3 hogconv.py [-o output_dir] [file1] [file2]\n
-Converts each python strategy file to a strategy file with extension .strat.
+    print ("""usage: python3 hogconv.py [-o output_dir] [file1] [file2] ...\n
+Converts each Python Hog strategy to a .strat (space-separated matrix) file that may then be imported into Bacon.
 Saves resulting files to the current directory by default. Use -o to specify a different directory.\n""")
     
 else:
     print ("\nconverted a total of " + str(count) + (" strategies." if count != 1 else " strategy."))
-    print ("\ntips: run 'bacon -i -f" + (out_dir + "/*'" if out_dir else "*'") + "to import the converted strategies into hog.")
+    print ("\ntips: run 'bacon -i -f " + (out_dir + "/" if out_dir else "") + "*.strat' in bash to import the converted strategies into hog.")
+    print ("in powershell: 'bacon -i -f (ls " + (out_dir + "\\" if out_dir else "") + "*.strat | % FullName)'\n")
     print ("after strategies have been imported, run 'bacon -t [num_threads] [-f output_path]' to run tournament.")
-    print ("to clear all imported strategies, use 'bacon -rm all'.")
+    print ("to clear all imported strategies, use 'bacon -rm all'.\n")

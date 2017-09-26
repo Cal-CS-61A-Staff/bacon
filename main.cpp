@@ -56,12 +56,14 @@ stringstream buf;
 // list of ouput path specified after -f switch
 vector<char *> output_paths;
 
-// SIGINT handling
+/* integer used for SIGINT handling. If set to a value other than 0, 
+   all running learning & tournament threads will exit.*/
 static volatile int interrupt = 0;
 
 // indicates if running in console mode
 bool console_mode = 0;
 
+// SIGINT handler
 void int_handler(int dummy) {
     interrupt = 1;
 }

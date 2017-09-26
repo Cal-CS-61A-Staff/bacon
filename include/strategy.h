@@ -48,11 +48,13 @@
         int inner_order;
     };
 
+	// Strategy that asks the user what to roll at each turn
     class HumanStrategy : public IStrategy {
     public:
         int operator()(int _, int __);
     };
 
+	// Strategy containing a matrix that records the number of dice to roll for each set of scores (0...100, 0...100)
     class MatrixStrategy : public IStrategy {
     public:
         // Create an empty MatrixStrategy that rolls 0 for all scores

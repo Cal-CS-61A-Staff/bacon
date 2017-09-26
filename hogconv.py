@@ -15,6 +15,9 @@ count, out_dir, out_sw = 0, '', False
 # dict of names, used to check for duplicate team names
 output_names = {}
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+	
 def convert(file):  
     module_path = file[:-3] # cut off .py
     
@@ -24,28 +27,36 @@ def convert(file):
     sys.path[-1] = module_dir
     
     # import module 
-    module = imp.load_source(module_name, file)
+    try:
+        module = imp.load_source(module_name, file)
+    except Exception as e:
+        # report errors while importing
+        eprint ("\nERROR: error occurred while loading " + file + ":")
+        eprint (type(e).__name__ + ': ' + str(e))
+        eprint ("skipping...\n")
+        
+        return 0
     
     try:
         strat = getattr(module, STRATEGY_FUNC_ATTR)
     except:
-        print (file + " has no attribute " + STRATEGY_FUNC_ATTR + " , skipping...") 
+        eprint ("ERROR: " + file + " has no attribute " + STRATEGY_FUNC_ATTR + " , skipping...")
         return 0
     
     try:
         output_name = getattr(module, TEAM_NAME_ATTR)
     except:
-        print ("WARNING: " + file + " does not specify " + TEAM_NAME_ATTR + ". Using module name as team name...")
+        eprint ("WARNING: " + file + " does not specify " + TEAM_NAME_ATTR + ". Using module name as team name...")
         output_name = module_name
     
     # check for empty team names
     if not output_name:
-        print ("WARNING: " + file + " has an empty team name. Setting team name to " + DEF_EMPTY_TEAM_NAME + "...")
+        eprint ("WARNING: " + file + " has an empty team name. Setting team name to " + DEF_EMPTY_TEAM_NAME + "...")
         output_name = DEF_EMPTY_TEAM_NAME
         
     # check for team names that are too long
     if len(output_name) > TEAM_NAME_MAX_LEN:
-        print ("WARNING: " + file + " has a team name longer than " + TEAM_NAME_MAX_LEN + 
+        eprint ("WARNING: " + file + " has a team name longer than " + TEAM_NAME_MAX_LEN + 
                " chars. Setting team name to " + DEF_LONG_TEAM_NAME + "...")
         output_name = DEF_LONG_TEAM_NAME
     
@@ -53,7 +64,7 @@ def convert(file):
     if output_name in output_names:
         full_output_name = output_name + "__" + str(output_names[output_name]) + '.strat'
         output_names[output_name] += 1
-        print("WARNING: found multiple teams with name", output_name + ". Writing to output file",
+        eprint("WARNING: found multiple teams with name", output_name + ". Writing to output file",
                full_output_name, "instead to disambiguate...")
         
     else:
@@ -70,11 +81,21 @@ def convert(file):
     out = open(os.path.join(out_dir, full_output_name), 'w')
     
     # write out new strategy
-    for i in range(GOAL):
-        for j in range(GOAL):
-            if j: out.write(' ')
-            out.write(str(strat(i, j)))
-        out.write('\n')
+    
+    try:
+        for i in range(GOAL):
+            for j in range(GOAL):
+                if j: out.write(' ')
+                out.write(str(strat(i, j)))
+            out.write('\n')
+            
+    except Exception as e:
+        # report errors while running strategy
+        eprint ("\nERROR: error occurred while running " + STRATEGY_FUNC_ATTR + ' in ' + file + ":") 
+        eprint (type(e).__name__ + ': ' + str(e))
+        eprint ("skipping...\n")
+        
+        return 0
     
     out.flush()
     out.close()
@@ -117,7 +138,7 @@ for i in range(1, len(sys.argv)):
             count += convert(path)
             
     else:
-        print ("can't access " + path + ", skipping...")  
+        eprint ("ERROR: can't access " + path + ", skipping...")  
     
 if len(sys.argv) <= 1:
     print ("""usage: python3 hogconv.py [-o output_dir] [file1] [file2] ...\n

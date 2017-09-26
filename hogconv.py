@@ -15,6 +15,7 @@ count, out_dir, out_sw = 0, '', False
 # dict of names, used to check for duplicate team names
 output_names = {}
 
+# print to stderr
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 	

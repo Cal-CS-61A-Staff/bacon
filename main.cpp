@@ -38,17 +38,23 @@ const string LEARN_PATH = string(STORAGE_ROOT).append("learn.dat");
 // Path to load options from
 const string OPTIONS_PATH = string(STORAGE_ROOT).append("options.dat");
 
+
 // A map containing all strategies
 map<string, IStrategy *> strat;
 
-// Map with only built-in strategies
+// Map with only built-in strategies, used to restore built-in strategies when imported strategies are removed
 map<string, IStrategy*> builtin_strats;
 
-// Extra strategies added by user
+// Extra strategies added/imported by user
 set<string> extra_strats;
+
 
 // Pointer to the default LearningStrategy instance
 LearningStrategy * learning_strat;
+
+
+// indicates if running in console mode
+bool console_mode = 0;
 
 // virtual buffer 
 stringstream buf;
@@ -56,8 +62,6 @@ stringstream buf;
 // list of ouput path specified after -f switch
 vector<char *> output_paths;
 
-// indicates if running in console mode
-bool console_mode = 0;
 
 /* integer used for SIGINT handling. If set to a value other than 0, 
    all running learning & tournament threads will exit.*/
@@ -660,7 +664,7 @@ void exec(string cmd){
             if (name == "cancel") break;
 			
             auto it = extra_strats.find(name);
-			bool erase_all = (it == extra_strats.end()) && (name == "all");
+			bool erase_all = (it == extra_strats.end()) && (name == "all" || name == "*");
 			
             if (it != extra_strats.end() || erase_all) {
 				if (erase_all){

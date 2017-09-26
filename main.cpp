@@ -53,8 +53,8 @@ set<string> extra_strats;
 LearningStrategy * learning_strat;
 
 
-// indicates if running in console mode
-bool console_mode = 0;
+// indicates if running in interactive mode
+bool interactive_mode = 0;
 
 // virtual buffer 
 stringstream buf;
@@ -80,11 +80,15 @@ inline bool has_buf() {
 
 template <typename T>
 // read in a name from the virtual buffer or, if it is not availble, the cin buffer
-inline void read_token(T & read_to) {
-    if (buf.str().empty())
+inline int read_token(T & read_to) {
+    if (buf.str().empty()){
         cin >> read_to;
-    else
+		return !cin.fail();
+	}
+    else{
         buf >> read_to;
+		return true;
+	}
 }
 
 // print a horizontal line
@@ -104,27 +108,38 @@ inline void list_strats(bool no_human = false, bool extras_only = false) {
 }
 
 // ask for a path
-inline void ask_for_path(char * c, int len = 256) {
+inline int ask_for_path(char * c, int len = 256) {
     if (output_paths.size()) {
         // use path specified with -f switch
         strcpy(c, output_paths[output_paths.size()-1]);
         output_paths.pop_back();
+		return true;
     }
     else {
 #ifdef _WIN32
-        if (console_mode) 
+        if (interactive_mode) // fix for Windows, do not need to ignore in interactive mode
 #endif
-			cin.ignore();
+			cin.ignore(); // ignore newline
 			
-        cin.getline(c, 256);
+         cin.getline(c, 256);
+		 
+		 return !cin.fail();
     }
 }
 
 // ask the user for a strategy name
 inline IStrategy & ask_for_strategy(string msg, bool no_human = false) {
     string name;
-
+	int success = true;
+	
     do{
+		// interrupted by SIGINT or EOF
+		if (!success || interrupt){
+			interrupt = false;
+			cout << "Interrupted, using default strategy...";
+			return DEFAULT_STRATEGY;
+		}
+		
         if (!has_buf()) {
             cout << msg;
             print_hline();
@@ -134,9 +149,9 @@ inline IStrategy & ask_for_strategy(string msg, bool no_human = false) {
             if (!no_human) cout << "\n\nNote: 'human' means YOU play!";
             print_hline();
         }
-
-        read_token(name);
-
+		
+		success = read_token(name);
+		
     } while ((no_human && name == "human") || strat.find(name) == strat.end());
 
     return *strat[name];
@@ -302,7 +317,8 @@ void exec(string cmd){
 		if (output_paths.size() == 0) cout << "\nNumber of threads:" << endl;
 		
 		int thds = 4;
-		read_token(thds);
+		int success = read_token(thds);
+		if (!success) return;
 		
 		if (thds <= 0) thds = 4;
 		
@@ -369,7 +385,8 @@ void exec(string cmd){
         int number;
         if (!has_buf()) cout << "Number of training rounds: ";
 
-        read_token(number);
+        int success = read_token(number);
+		if (!success) return;
 
         IStrategy & s0 = ask_for_strategy("\nTraining opponent strategy name:", true);
 
@@ -500,12 +517,12 @@ void exec(string cmd){
     else if (cmd == "mkfinal") {
         string name;
 
-        while (name.length() == 0) {
+        do {
             if (!has_buf())
                 cout << "\nName to use for this strategy\n(Warning: using the name of an " <<
                 "existing strategy will override that strategy!):\n\n";
-            read_token(name);
-        }
+        } while (name.length() == 0 && read_token(name) && !interrupt);
+		if (interrupt) {interrupt = false; return;}
 
         MatrixStrategy * opti_strat = create_final_strat();
 
@@ -514,12 +531,12 @@ void exec(string cmd){
 
     else if (cmd == "mkrandom") {
         string name;
-        while (name.length() == 0) {
+        do {
             if (!has_buf())
                 cout << "\nName to use for this strategy\n(Warning: using the name of an " <<
                 "existing strategy will override that strategy!):\n\n";
-            read_token(name);
-        }
+        } while (name.length() == 0 && read_token(name) && !interrupt);
+		if (interrupt) {interrupt = false; return;}
 
         RandomStrategy rs = RandomStrategy();
         MatrixStrategy * rand_strat = new MatrixStrategy(rs);
@@ -552,9 +569,9 @@ void exec(string cmd){
                 print_hline();
             }
 
-            read_token(name);
-
-            if (name == "cancel") break;
+            int success = read_token(name);
+            if (!success || name == "cancel" || interrupt) break;
+			
             auto it = strat.find(name);
             if (it != strat.end()) {
                 // found!
@@ -585,6 +602,7 @@ void exec(string cmd){
             }
 
         }
+		if (interrupt) interrupt = false;
     }
 
     else if (cmd == "-i" || cmd == "import") {
@@ -597,7 +615,9 @@ void exec(string cmd){
 
         do {
             char path[256];
-            ask_for_path(path);
+            int success = ask_for_path(path);
+			
+			if (interrupt || !success) break;
 
             string name;
             if (!single_mode) {
@@ -630,6 +650,8 @@ void exec(string cmd){
             }
 
         } while (output_paths.size() > 0);
+		
+		if (interrupt) {interrupt = false; return;}
 
         if (ct) {
             if (single_mode || ct == 1)
@@ -659,9 +681,8 @@ void exec(string cmd){
                 print_hline();
             }
 
-            read_token(name);
-
-            if (name == "cancel") break;
+            int success = read_token(name);
+            if (name == "cancel" || interrupt || !success) break;
 			
             auto it = extra_strats.find(name);
 			bool erase_all = (it == extra_strats.end()) && (name == "all" || name == "*");
@@ -706,6 +727,8 @@ void exec(string cmd){
             }
 
         }
+		
+		if (interrupt) {interrupt = false; return;}
     }
 
     else if (cmd == "-c" || cmd == "clone") {
@@ -717,7 +740,8 @@ void exec(string cmd){
                 cout << "\nName to use for the cloned strategy\n" <<
                 "(Warning: using the name of an existing strategy will override that strategy!):\n\n";
 
-            read_token(name);
+            int success = read_token(name);
+			if (!success || interrupt) {interrupt =  false; return;}
 
             if (name == "learn") {
                 cout << "The name 'learn' is reserved.\n";
@@ -752,7 +776,8 @@ void exec(string cmd){
                 cout << "): ";
             }
 
-            read_token(name);
+            int success = read_token(name);
+			if (!success || interrupt) { interrupt = false; return; }
 
             if (find(opt.begin(), opt.end(), name) == opt.end()) {
                 cout << "\nInvalid option. (choices: ";
@@ -769,7 +794,8 @@ void exec(string cmd){
                 cout << "\nValue for option '" << name << "': (on/off): ";
             }
 
-            read_token(value);
+            int success = read_token(value);
+			if (!success || interrupt) { interrupt = false; return; }
 
             if (value == "on") {
                 if (name == "swap")
@@ -933,8 +959,8 @@ int main(int argc, char * argv[]) {
         // Print greeting message
         cout << "Welcome to " << APP_NAME << " v." << VERSION << "!\n(c) Alex Yu 2017" << endl;
 
-        // Enter console mode
-        console_mode = true;
+        // We are in interactive mode
+        interactive_mode = true;
 		
         // Main loop
         do {

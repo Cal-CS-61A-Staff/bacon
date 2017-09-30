@@ -544,18 +544,18 @@ double average_win_rate_coroutine(IStrategy & strat, IStrategy & oppo_strat, int
 /* Recursively computes win rate of one strategy against another at a set of scores (memoized)
 
    Params:
-   strat, oppo_strat: keeps track of players' strategies (not part of the state)
+   strat, oppo_strat: keep track of the players' strategies (NOT part of the state)
    thread_id: thread id. Index of DP vector to use for DP storage.
 
-   Params (the DP state):
-   score, oppo_score: score of the players
+   The state:
+   score, oppo_score: scores of the players
    who: player number of the current player
    turn: current turn number, mod 8 (needed because of time trot)
-   trot: wheter time trot is allowed (will become 0 after time trot is applied, 
-         because time trot may not be used twice in a row)
+   trot: whether time trot is enabled (will be set to 0 after time trot is applied
+         to ensure time trot is not used twice in a row)
 
-    Time complexity: (N^2 * M^2) where N = goal score, M = max rolls OR Time Trot modulo (<=M)
-    Constant factors: who (2), trot(2), DICE_SIDES(6)
+    Time complexity: (N^2 * M^2) where N = goal score, M = max rolls
+    Constant factors to consider: who (2), trot(2), DICE_SIDES(6)
 */
 double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
             int strategy0_plays_as, int score0, int score1, int starting_turn, int thread_id) {

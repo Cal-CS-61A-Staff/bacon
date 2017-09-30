@@ -410,7 +410,7 @@ MatrixStrategy * create_final_strat(bool quiet) {
 
 // *** Win rate computations ***
 
-// storage for win rate computation DP	
+// storage class for win rate computation DP	
 class WinRateStorage{
 	
 public:	
@@ -458,10 +458,11 @@ private:
 
 };
 
-// DP storage
+/* DP storage vector. A new WinRateStorage is allocated for each thread spawned to prevent access conflict.
+   Initialized with a single WinRateStorage and resized as required. */
 vector<WinRateStorage> dp(1);
 
-// coroutine for average_win_rate
+// coroutine for average win rate calculator
 double average_win_rate_coroutine(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
             int who, int turn, int trot, int t_id) {
 
@@ -544,7 +545,7 @@ double average_win_rate_coroutine(IStrategy & strat, IStrategy & oppo_strat, int
 
    Params:
    strat, oppo_strat: keeps track of players' strategies (not part of the state)
-   t_id: thread id. Item of the DP vector to use for storage. This is to enable multithreading.
+   thread_id: thread id. Index of DP vector to use for DP storage.
 
    Params (the DP state):
    score, oppo_score: score of the players

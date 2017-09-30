@@ -587,7 +587,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     return total / samp;
 }
 
-// compute the average win rate by sampling (i.e. playing many games)
+// compute the average win rate by sampling (i.e. playing lots of games)
 double average_win_rate_by_sampling(IStrategy & strategy0, IStrategy & strategy1,
                      int strategy0_plays_as, int score0, int score1, int starting_turn, int samples) {
 
@@ -624,7 +624,7 @@ double average_win_rate_by_sampling(IStrategy & strategy0, IStrategy & strategy1
     return (double)wins / samples;
 }
 
-// sorts by wins descending, then sorts by names alphabetically
+// sorts by wins in descending order, then sorts by names alphabetically
 bool wins_comparer(pair<int, string> * a, pair<int, string> * b) {
     if (a->first > b->first) 
         return true;
@@ -637,11 +637,12 @@ bool wins_comparer(pair<int, string> * a, pair<int, string> * b) {
     }
 }
 
+// multithreading stuff
 mutex mtx;
 condition_variable announcer_cv;
 bool announcer_lock = false;
 
-// Coroutine for the round-robin tournament procedure
+// coroutine for the round-robin tournament procedure
 void round_robin_coroutine(vector<pair<string, IStrategy *> > strats,
     void announcer(int games_played, int games_remaining, int high, string high_strat),
     int announcer_interval, double margin, volatile int * interrupt, 

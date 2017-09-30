@@ -25,8 +25,6 @@ double prob_turn_num_at_score[MOD_TROT][GOAL][GOAL];
 // if t is 1, Time Trot is enabled at the current turn. else it is disabled.
 pair<double, int> win_rate_at_score[GOAL][GOAL][2];
 
-const int test0 = -1, test1 = 2;
-
 bool perms_computed = false, turn_num_computed = false;
 
 // helper function for adding & swapping scores
@@ -273,10 +271,10 @@ void compute_prob_turn_num_at_score() {
 }
 
 /* Part of the final strategy implementation
-   Note: this is NOT the procedure for calculating the exact win rate. Look for compute_average_win_rate.
+   Note: this is NOT the procedure for calculating the exact win rate. Look for average_win_rate.
    
    Due to special properties of the scores (i.e. the same score cannot occur twice in a game)
-   this function may be memoized. However, bottom-up dp is very difficult to write.
+   this function may be written recursively.
 
    Time complexity: O(N^2 * M^2) where N is the goal score, and M is the max # rolls. 
    Constant factors: DICE_SIDES (6), trot (2) */
@@ -322,12 +320,6 @@ pair<double, int> compute_win_rates(int i, int j, int trot) {
 
                         if (r < MOD_TROT) trot_prob = prob_turn_num_at_score[r][i][j];
 
-                        if (i == test0 && j == test1 && test0 >= 0 && test1 >= 0) {
-                            if (trot_prob > 0.1) cerr << trot_prob;
-
-                            cerr << "\t";
-                        }
-
                         delta =
                             (1.0 - compute_win_rates(new_oppo_score, new_score, 1).first) * (1 - trot_prob) +
                             compute_win_rates(new_score, new_oppo_score, 0).first * trot_prob;
@@ -335,12 +327,6 @@ pair<double, int> compute_win_rates(int i, int j, int trot) {
                     else {
                         // no Time Trot allowed
                         delta = 1.0 - compute_win_rates(new_oppo_score, new_score, 1).first;
-                    }
-                }
-
-                if (i == test0 && j == test1 && test0 >= 0 && test1 >= 0) {
-                    if (true) {
-                        cerr << r << "\t" << k << "\t" << delta << " \t" << total_roll_perms_for_sum[r][k] << " = " << prob_roll_sum[r][k] << endl;
                     }
                 }
 
@@ -368,9 +354,6 @@ pair<double, int> compute_win_rates(int i, int j, int trot) {
 
             wr /= total_times_score_counted;
 
-            if (i == test0 && j == test1 && test0 >= 0 && test1 >= 0)
-                cerr << wr << endl;
-
             if (wr > best_wr) {
                 best_wr = wr;
                 best_strat = r;
@@ -383,6 +366,7 @@ pair<double, int> compute_win_rates(int i, int j, int trot) {
     return win_rate_at_score[i][j][trot];
 }
 
+// Compute the "final strategy" and return a MatrixStrategy containing the roll number for each score
 MatrixStrategy * create_final_strat(bool quiet) {
     pair<double, int> default_val = pair<double, int>(-1.0, -1);
     fill(win_rate_at_score[0][0], win_rate_at_score[0][0] + GOAL * GOAL * 2, default_val);
@@ -414,11 +398,6 @@ MatrixStrategy * create_final_strat(bool quiet) {
         for (int j = 0; j < GOAL; ++j) {
             opt_strat->set_roll_num(i, j, compute_win_rates(i, j, 1).second);
         }
-    }
-
-    if (test0 >= 0 && test1 >= 0) {
-        cerr << win_rate_at_score[test0][test1][1].first << " ";
-        cerr << win_rate_at_score[test0][test1][1].second << endl;
     }
 
     if (!quiet)
@@ -479,25 +458,11 @@ private:
 
 };
 
+// DP storage
 vector<WinRateStorage> dp(1);
 
-/* Recursively computes win rate of one strategy against another at a set of scores (memoized)
-
-   Params:
-   strat, oppo_strat: keeps track of players' strategies (not part of the state)
-   t_id: thread id. Item of the DP vector to use for storage. This is to enable multithreading.
-
-   Params (the DP state):
-   score, oppo_score: score of the players
-   who: player number of the current player
-   turn: current turn number, mod 8 (needed because of time trot)
-   trot: wheter time trot is allowed (will become 0 after time trot is applied, 
-         because time trot may not be used twice in a row)
-
-    Time complexity: (N^2 * M^2) where N = goal score, M = max rolls OR Time Trot modulo (<=M)
-    Constant factors: who (2), trot(2), DICE_SIDES(6)
-*/
-double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
+// coroutine for average_win_rate
+double average_win_rate_coroutine(IStrategy & strat, IStrategy & oppo_strat, int score, int oppo_scoe,
             int who, int turn, int trot, int t_id) {
 
     if (dp[t_id].get(score, oppo_scoe, who, turn, trot) == -1.0) {
@@ -534,12 +499,12 @@ double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int s
                 if (enable_time_trot && trot && turn == r) {
                     // apply Time Trot
                     delta =
-                        compute_average_win_rate(strat, oppo_strat, 
+                        average_win_rate_coroutine(strat, oppo_strat, 
                             new_score, new_oppo_score, who, (turn + 1) % MOD_TROT, 0, t_id);
                 }
                 else {
                     // no Time Trot, go to opponent's round
-                    delta = 1.0 - compute_average_win_rate(oppo_strat, strat,
+                    delta = 1.0 - average_win_rate_coroutine(oppo_strat, strat,
                         new_oppo_score, new_score, 1-who, 
                         (enable_time_trot * (turn + 1)) % MOD_TROT, enable_time_trot, t_id); 
                 }
@@ -575,6 +540,22 @@ double compute_average_win_rate(IStrategy & strat, IStrategy & oppo_strat, int s
     return dp[t_id].get(score, oppo_scoe, who, turn, trot);
 }
 
+/* Recursively computes win rate of one strategy against another at a set of scores (memoized)
+
+   Params:
+   strat, oppo_strat: keeps track of players' strategies (not part of the state)
+   t_id: thread id. Item of the DP vector to use for storage. This is to enable multithreading.
+
+   Params (the DP state):
+   score, oppo_score: score of the players
+   who: player number of the current player
+   turn: current turn number, mod 8 (needed because of time trot)
+   trot: wheter time trot is allowed (will become 0 after time trot is applied, 
+         because time trot may not be used twice in a row)
+
+    Time complexity: (N^2 * M^2) where N = goal score, M = max rolls OR Time Trot modulo (<=M)
+    Constant factors: who (2), trot(2), DICE_SIDES(6)
+*/
 double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
             int strategy0_plays_as, int score0, int score1, int starting_turn, int thread_id) {
 
@@ -587,7 +568,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     double total = 0.0, samp = 0.0;
 
     if (strategy0_plays_as != 1) { // average of playing as each player
-        total += compute_average_win_rate(strategy0, strategy1, score0, score1, 0,
+        total += average_win_rate_coroutine(strategy0, strategy1, score0, score1, 0,
             starting_turn, enable_time_trot, thread_id);
 
         // init dp array
@@ -596,7 +577,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     }
 
     if (strategy0_plays_as != 0) {
-        total += 1 - compute_average_win_rate(strategy1, strategy0, score1, score0, 0,
+        total += 1 - average_win_rate_coroutine(strategy1, strategy0, score1, score0, 0,
             starting_turn, enable_time_trot, thread_id);
 
         ++ samp;
@@ -605,6 +586,7 @@ double average_win_rate(IStrategy & strategy0, IStrategy & strategy1,
     return total / samp;
 }
 
+// compute the average win rate by sampling (i.e. playing many games)
 double average_win_rate_by_sampling(IStrategy & strategy0, IStrategy & strategy1,
                      int strategy0_plays_as, int score0, int score1, int starting_turn, int samples) {
 
@@ -658,6 +640,7 @@ mutex mtx;
 condition_variable announcer_cv;
 bool announcer_lock = false;
 
+// Coroutine for the round-robin tournament procedure
 void round_robin_coroutine(vector<pair<string, IStrategy *> > strats,
     void announcer(int games_played, int games_remaining, int high, string high_strat),
     int announcer_interval, double margin, volatile int * interrupt, 
@@ -710,7 +693,7 @@ void round_robin_coroutine(vector<pair<string, IStrategy *> > strats,
 }
 
 
-// Run a round-robin tournament
+// Run a round-robin tournament on [thread] threads
 vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *> > strats,
     void announcer(int games_played, int games_remaining, int high, string high_strat),
     int announcer_interval, double margin, int threads, volatile int * interrupt){

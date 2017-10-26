@@ -10,6 +10,9 @@ TEAM_NAME_MAX_LEN = 50 # max length for team names
 DEF_EMPTY_TEAM_NAME = "(empty string)" # name for teams with an empty team name
 DEF_LONG_TEAM_NAME = "(team name longer than 50 chars)" # name for teams with team names that are too long
 
+MIN_ROLLS, MAX_ROLLS = 0, 10 # min, max roll numbers
+ERROR_DEFAULT_ROLL = 4 # default roll in case of invalid strategy function (will report error)
+
 count, out_dir, out_sw = 0, '', False
 
 # dict of names, used to check for duplicate team names
@@ -17,9 +20,11 @@ output_names = {}
 
 # print to stderr
 def eprint(*args, **kwargs):
+    """ print to stderr """
     print(*args, file=sys.stderr, **kwargs)
 	
 def convert(file):  
+    """ convert a single file """
     module_path = file[:-3] # cut off .py
     
     module_dir, module_name = os.path.split(module_path)
@@ -84,10 +89,28 @@ def convert(file):
     # write out new strategy
     
     try:
+        skip_rest = False
+        
         for i in range(GOAL):
             for j in range(GOAL):
                 if j: out.write(' ')
-                out.write(str(strat(i, j)))
+                
+                if not skip_rest:
+                    rolls = strat(i, j)
+                
+                    # check if output valid
+                    if type(rolls) != int or rolls < MIN_ROLLS or rolls > MAX_ROLLS:
+                        if type(rolls) != int:
+                            eprint("WARNING: team", output_name + "'s strategy function outputted something other than a number!")
+                        elif type(rolls) != int:
+                            eprint("WARNING: team", output_name + "'s strategy function outputted an invalid number of rolls:", rolls + "!")
+                            
+                        eprint("Due to invalid strategy function, all rolls for team", output_name , "will default to 4. Please notify the students!")
+                        
+                        rolls = ERROR_DEFAULT_ROLL
+                        skip_rest = True
+                
+                out.write(str(rolls))
             out.write('\n')
             
     except Exception as e:
@@ -107,6 +130,7 @@ def convert(file):
     
 
 def convert_dir(dir = os.path.dirname(__file__)):
+    """ convert all files in a directory (does not recurse) """
     count = 0   
     
     for file in os.listdir(dir or None):
@@ -151,4 +175,4 @@ else:
     print ("\ntips: run 'bacon -i -f " + (out_dir + "/" if out_dir else "") + "*.strat' in bash to import the converted strategies into hog.")
     print ("in powershell: 'bacon -i -f (ls " + (out_dir + "\\" if out_dir else "") + "*.strat | % FullName)'\n")
     print ("after strategies have been imported, run 'bacon -t [num_threads] [-f output_path]' to run tournament.")
-    print ("to clear all imported strategies, use 'bacon -rm all'.\n")
+    print ("to clear all imported strategies, use 'bacon -rm all'.")

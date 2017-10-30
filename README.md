@@ -11,7 +11,8 @@ Bacon may be used by students to construct and test strategies, or by instructor
 The core portion of Bacon is written entirely in C++ and is highly optimized. 
 On average, the computation of the exact theoretical winrate between two strategies takes approximately 100 milliseconds.
 
-Moreover, the tournament procedure is multithreaded and may be split up to run on an arbitrary number of threads. A test tournament with 132 random strategies (8646 games) finished in less than **11.5 minutes**, a lot faster than the old contest system, which is taking almost a week to compute the results of a tournament with 120 strategies.
+Moreover, the tournament procedure is multithreaded and may be split up to run on an arbitrary number of threads. 
+A test tournament with 100 random strategies (4950 games) finished in less than **1.5 minutes** when ran on 12 threads on OCF, a lot faster than the old contest system, which is taking almost a week to compute the results of a tournament with the same number of strategies. Another test tournament with 132 random strategies (8646 games) finished in less than **11.5 minutes** running on 2 threads.
 
 ### Components
 This project has two main components: `bacon` and `hogconv[.py]`.
@@ -136,6 +137,7 @@ Run a tournament between all imported strategies:
 bacon -t threads -f output_file
 ```
 Where `threads` is the number of threads to use, and `output_file` is a file to write out the final rankings to.
+To stop the tournament before it finishes, simply press `ctrl + C`.
 
 You can also measure the runtime of any command using `time`:
 ```sh
@@ -148,7 +150,7 @@ Another way to use Bacon is through the interactive shell. You may start the int
 bacon
 ```
 
-This shell works sort of like Python's, except obviously a lot simpler. You may enter any bacon command and receive a response.
+You may enter any bacon command here and receive an immediate response.
 
 For example, to calculate win rate, use the command `winrate`:
 ```sh

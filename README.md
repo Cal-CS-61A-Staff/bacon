@@ -213,7 +213,7 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 | export (-e) |  export a strategy to a file. Use the -f switch parameter to specify output file path |  bacon -o final -f final.strat  |
 | exportpy |  export a strategy to a Python script that defines a function called 'strategy'. |
 | clone (-c) |  clones an existing strategy and saves a cached copy of it to a new name. |
-| remove (-rm) |  remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-r all' to clear all imported strategies. |
+| remove (-rm) |  remove an imported strategy and restore an internal strategy, if available. Enter 'remove all' or '-rm all' to clear all imported strategies. |
 
 #### Logistics
 

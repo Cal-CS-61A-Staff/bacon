@@ -107,7 +107,7 @@ bacon -ls
 
 #### Other cool things you can do:
 
-Draw a diagram of a strategy (must use appropriate monospaced font):
+Draw a diagram of a strategy (your console must use an appropriate monospaced font for this to work):
 ```sh
 bacon -g final
 ```

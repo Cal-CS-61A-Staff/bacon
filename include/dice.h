@@ -17,7 +17,7 @@ public:
 // Fair die that returns each with equal likelihood
 class FairDice : public IDice {
 public:
-    // Create a fair die with 'side' sides
+    // Create a fair die with 'sides' sides
     FairDice(int sides) { numSides = sides; }
 
     // Number of sides on this die
@@ -47,7 +47,7 @@ public:
         va_end(ap);
     }
 
-    int next() {
+    int operator() () {
         int val = choices[index];
         index = (index + 1) % (choices.size());
         return val;

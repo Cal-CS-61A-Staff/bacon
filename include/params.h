@@ -4,7 +4,7 @@
     #define PARAMS_H
     // ** Parameters for the Hog game **
 
-    // Number of sides in a default die
+    // Number of sides on a default die
     const int DICE_SIDES = 6;
 
     // Number of times to roll

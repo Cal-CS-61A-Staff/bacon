@@ -6,22 +6,30 @@
 using namespace std;
 
 // dice stuff
+
+// Interface for al dice types
 class IDice {
 public:
+    // Returns number obtained by rolling this die
     virtual int operator() () =0;
 };
 
+// Fair die that returns each with equal likelihood
 class FairDice : public IDice {
 public:
+    // Create a fair die with 'side' sides
     FairDice(int sides) { numSides = sides; }
 
+    // Number of sides on this die
     int getNumSides() { return numSides; }
+    
     int operator() () { return rand() % numSides + 1; }
 
 private:
     int numSides;
 };
 
+// A die that deterministically cycles through a list of possible options
 class TestDice : public IDice {
 public:
     vector<int> choices;
@@ -46,5 +54,6 @@ public:
     }
 };
 
+// Default die used in Hog; usually a six-sided fair die (defined in hog.cpp)
 extern FairDice DEFAULT_DICE;
 #endif

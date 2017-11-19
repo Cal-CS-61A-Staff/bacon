@@ -8,8 +8,11 @@
 
     using namespace std;
 
+    // Interface for all strategies
     class IStrategy {
     public:
+        /* Get what this strategy would roll at a given set of scores.
+          (where score0 is the current player's score, score1 is the opponent's score)*/
         virtual int operator()(int score0, int score1) =0;
     };
 
@@ -17,7 +20,7 @@
     class AlwaysRollStrategy : public IStrategy {
     public:
 
-        // A strategy that always rolls num dice
+        // Creates a strategy that always rolls 'num' dice
         AlwaysRollStrategy(int num) { num_to_roll = num; }
 
         int operator()(int score0, int score1) { return num_to_roll; }
@@ -26,7 +29,7 @@
         int num_to_roll;
     };
 
-    // A strategy that rolls a random number of dice between 0-10
+    // A strategy that rolls a random number of dice between 0-10 at each turn
     class RandomStrategy : public IStrategy {
     public:
         int operator()(int score0, int score1);
@@ -48,22 +51,22 @@
         int inner_order;
     };
 
-	// Strategy that asks the user what to roll at each turn
+	// A strategy that asks the user what to roll at each turn
     class HumanStrategy : public IStrategy {
     public:
         int operator()(int _, int __);
     };
 
-	// Strategy containing a matrix that records the number of dice to roll for each set of scores (0...100, 0...100)
+	// Strategy that records the number of dice to roll for each set of scores (0...100, 0...100) in a matrix
     class MatrixStrategy : public IStrategy {
     public:
         // Create an empty MatrixStrategy that rolls 0 for all scores
         MatrixStrategy() { memset(rolls, 0, sizeof rolls); }
 
-        // Create a new MatrixStrategy that caches the rolls of another strategy at each score
+        // Create a new MatrixStrategy by evaluating another strategy at each roll number
         MatrixStrategy(IStrategy & strat);
 
-        // Create a new MatrixStrategy from a jagged array
+        // Create a new MatrixStrategy from an array
         MatrixStrategy(int ** mat);
 
         // Set the number the strategy rolls at a set of scores

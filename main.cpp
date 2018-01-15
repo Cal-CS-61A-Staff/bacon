@@ -128,7 +128,7 @@ inline int ask_for_path(char * c, int len = 256) {
 }
 
 // ask the user for a strategy name
-inline IStrategy & ask_for_strategy(string msg, bool no_human = false) {
+inline IStrategy & ask_for_strategy(const string & msg, bool no_human = false) {
     string name;
 	int success = true;
 	
@@ -186,7 +186,7 @@ void write_options(void) {
 }
 
 // load extra strategies
-void load_exts(string path) {
+void load_exts(const string & path) {
     ifstream ext_ifs(EXT_PATH);
 
     string header = "", name = "";
@@ -216,7 +216,7 @@ void load_exts(string path) {
 }
 
 // write out extra strategies to the path specified
-void write_exts(string path) {
+void write_exts(const string & path) {
     ofstream ext_ofs(EXT_PATH);
 
     for (auto name : extra_strats) {
@@ -264,7 +264,7 @@ inline void show_available_commands(void) {
 play (-p) \t\t tournament (-t [-f]) \t train (-l) \t\t learnfrom (-lf) \n\
 winrate[0|1] (-r[0|1])\t avgwinrate[0|1]\t mkfinal \t\t mkrandom\n\
 get (-s) \t\t diff (-d) \t\t graph (-g) \t\t graphdiff (-gd) \n\
-list (-l) \t\t import (-i [-f]) \t export[py] (-e [-f]) \t clone (-c)\n\
+list (-ls) \t\t import (-i [-f]) \t export[py] (-e [-f]) \t clone (-c)\n\
 remove (-rm) \t\t help (-h) \t\t version (-v) \t\t option (-o) \t\t\n\
 \t\t\t\t\t\t time \t\t\t exit" << endl << endl;
 }
@@ -276,7 +276,7 @@ void announcer(int games_played, int games_remaining, int high, string high_stra
 }
 
 // Execute Bacon command cmd
-void exec(string cmd){
+void exec(const string & cmd){
     // cancel any interrupts
     interrupt = 0;
 
@@ -457,7 +457,12 @@ void exec(string cmd){
         if (!has_buf()) cout << "Player 1 score: ";
         read_token(score1);
 
-        cout << "\nRolls for (" << score0 << "," << score1 << "): " << s0(score0, score1) << "\n" << endl;
+        if (score0 >= GOAL || score1 >= GOAL || score0 < 0 || score1 < 0){
+            cout << "\nInvalid scores! Please enter a score between 0-" << GOAL << endl;
+        }
+        else{
+            cout << "\nRolls for (" << score0 << "," << score1 << "): " << s0(score0, score1) << "\n" << endl;
+        }
     }
 
     else if (cmd == "-d" || cmd == "diff") {
@@ -592,7 +597,7 @@ void exec(string cmd){
 
                     cout << "Strategy exported to: '" << path << "'\n" << endl;
                 }
-                catch (exception ex) {
+                catch (exception & ex) {
                     cout << "Export failed!\n" << endl;
                 }
                 break;
@@ -1002,7 +1007,8 @@ int main(int argc, char * argv[]) {
         try {
             delete name.second;
         }
-        catch (exception ex) {
+        catch (exception & _) { 
+            // ignore error
         }
     }
 

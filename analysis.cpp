@@ -650,9 +650,11 @@ void round_robin_coroutine(vector<pair<string, IStrategy *> > strats,
         int jbase, int jdelta) {
 
     unsigned N = (unsigned)strats.size();
+
     int total_games = N * (N - 1) / 2;
 
     for (unsigned i = 0; i < N; ++i){
+        // interrupt not null & set
         if (interrupt && *interrupt) break;
 
         for (unsigned j = i + 1 + jbase; j < N; j += jdelta){
@@ -782,13 +784,8 @@ void draw_strategy_diagram(IStrategy & strat) {
             default:
                 cout << "??";
             }
-
-            /* if (result.second == 10)
-                 cout << "10";
-             else
-                 cout << result.second << " ";*/
         }
-        cout << "]\n";
+        cout << "]" << endl;
     }
 
     cout << "\nLEGEND:  [  ] = 0  [::] = 1,2  [||] = 3,4  [%%] = 5,6  [\u2593\u2593] = 7,8  [\u2588\u2588] = 9,10." << endl;

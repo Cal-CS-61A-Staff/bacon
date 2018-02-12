@@ -52,9 +52,9 @@ make install_user
 
 ### Mac OS X
 
-Just like with Linux, `cd` into the `bacon` directory and enter `make`.
-Unfortunately, `make install` will not work for Mac at this point.
-Instead, simply run the output binary: `bin/bacon` directly.
+As above, `cd` into the `bacon` directory and enter `make`.
+However, `make install` won't work for Mac.
+So simply use the output binary in the bin directory: `bin/bacon`.
 
 ### Windows
 
@@ -217,18 +217,18 @@ Player 0 strategy name:
 Player 1 stratey name:
 ```
 
-### List of All the Commands
+### List of Commands
 
 You can get a list of commands just like the one below by entering `bacon -h` in the shell or typing `help` into the Bacon console. The parts in brackets (`-p`, `-t`, etc.) are the shorthands for the commands. Some commands have no shorthands.
 
-#### The Game of Hog
+#### Hog
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
 | play (-p) |  simulate a game of Hog between two strategies (or play against one of them). |
 | tournament (-t) |  run a tournament with all the imported strategies. Use the -f switch to specify output file path |  bacon -t -f output.txt |
 
-#### Learning
+#### Strategy Training
 
 |  Command	 |  Description    |
 |  -------------  |  -------------  |
@@ -268,7 +268,7 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 | version (-v) |  display the version number. |
 | option (-o) |  adjust options (turn on/off Swine Swap, Time Trot). |
 | time |  measure the runtime of any bacon command. |
-| exit |  get out of here!	
+| exit |  exit the program
 
 ### List of built-in strategies
 

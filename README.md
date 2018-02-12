@@ -21,9 +21,9 @@ This project has two main components: `bacon` and `hogconv[.py]`.
 
 `hogconv.py` is a Python script that converts Hog strategies written in Python (containing final_strategy and TEAM_NAME as specified in the [Hog Contest](https://cs61a.org/proj/hog_contest/)) to `.strat` files which `bacon` can understand.
 
-## Installation
+## Quickstart
 
-### Linux / Mac OS X / etc.
+### Linux
 
 First, clone this repository into a folder of your choice:
 ```sh
@@ -45,10 +45,16 @@ Then install:
 make install
 ```
 
-If you are using a computer where you have no root/sudo access, use the following instead to install to `$HOME/bin`:
+OPTIONAL: If you are using a computer where you have no root/sudo access, use the following instead to install to `$HOME/bin`:
 ```sh
 make install_user
 ```
+
+### Mac OS X
+
+Just like with Linux, `cd` into the `bacon` directory and enter `make`.
+Unfortunately, `make install` will not work for Mac at this point.
+Instead, simply run the output binary: `bin/bacon` directly.
 
 ### Windows
 
@@ -69,11 +75,50 @@ Build the project by navigating to `Build > Build Solution`. The output file sho
 #### Method 2
 Alternatively, download and install [MinGW](https://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download) and [Make](http://gnuwin32.sourceforge.net/packages/make.htm) for Windows.
 
-Then just like with Linux/Mac, `cd` into the `bacon` directory and enter `make`. 
+Just like with Linux, `cd` into the `bacon` directory and enter `make`. 
 Do not use `make install` however. Instead, simply copy the `bacon.exe` file inside the `bin/` directory and `hogconv.py` inside the root directory to somewhere convenient and run them.
 
 
-## bacon: Usage
+### Running Simulated Tournaments
+
+Follow these steps to run simulated a tournament. Replace `hogconv.py` and `bin/bacon` below with the path to the script/binary on your system as appropriate.
+
+1. Convert the student's Python submissions to .strat: 
+```sh
+python hogconv.py -o strat [student_strategies/*.py hog_contest.py foo.py]
+```
+ list the `hog_contest.py` files in the [] part (don't actually include the []!) according to how the student strategies are laid out.
+
+ 
+2. Clear existing strategies in Bacon:
+```sh
+bin/bacon -rm all
+```
+
+3. Import the newly converted strategies:
+```sh
+bin/bacon -i -f strat/*
+```
+
+4. Simulate tournament (you can replace '4' below with number of threads desired):
+```sh
+bin/bacon -t 4 -f results.txt
+```
+ 
+5. Look at output in `results.txt`
+
+Output example:
+```
+1. doriath with 6 wins
+2. experimental with 5 wins
+3. alphahog with 4 wins
+4. antidefault with 2 wins
+4. antidefault_copy with 2 wins
+6. swap with 1 wins
+7. terrible with 0 wins
+```
+
+## bacon: Detailed Usage Guide
 
 
 ### Usage from System Shell
@@ -243,7 +288,7 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 
 `learn`: A special strategy which will learn and improve through training. Run the `train` command to train this strategy against another strategy. You may also run `learnfrom` to override `learn` with another strategy from which training will start.
 
-## hogconv: Usage
+## hogconv: Detailed Usage Guide
 
 Hogconv is a simple Python script to help instructors to convert Python-based strategies into space-separated matrices that Bacon can understand.
 

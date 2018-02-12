@@ -31,7 +31,7 @@
 
     /*Simulate a game between two strategies,
       starting at 'score0' and 'score1' at turn 'starting_turn' with goal score 'goal'.*/
-    pair<int, int> play(IStrategy & strategy0, IStrategy & strategy1, int score0 = 0, int score1 = 0,
+    std::pair<int, int> play(IStrategy & strategy0, IStrategy & strategy1, int score0 = 0, int score1 = 0,
                         IDice& dice = DEFAULT_DICE, int goal = GOAL, int starting_turn = 0);
 
 #endif

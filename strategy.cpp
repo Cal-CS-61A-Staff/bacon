@@ -18,12 +18,12 @@ AnnouncerStrategy::AnnouncerStrategy(IStrategy & strat, int player_order) : inne
 
 int AnnouncerStrategy::operator()(int score0, int score1) {
     if (inner_order == 0)
-        cout << "Current score: " << score0 << "-" << score1 << endl << endl;
+        std::cout << "Current score: " << score0 << "-" << score1 << std::endl << std::endl;
     else
-        cout << "Current score: " << score1 << "-" << score0 << endl << endl;
+        std::cout << "Current score: " << score1 << "-" << score0 << std::endl << std::endl;
 
     int inner_result = inner_strategy(score0, score1);
-    cout << "Player " << inner_order << " Rolled: " << inner_result << endl;
+    std::cout << "Player " << inner_order << " Rolled: " << inner_result << std::endl;
 
     return inner_result;
 }
@@ -34,10 +34,10 @@ int HumanStrategy::operator() (int _, int __) {
     int roll = 0;
 
     do {
-        if (roll != 0) cout << "Please enter a number between 0-10: ";
-        else cout << "Please enter the number of die you wish to roll, human (0-10): ";
+        if (roll != 0) std::cout << "Please enter a number between 0-10: ";
+        else std::cout << "Please enter the number of die you wish to roll, human (0-10): ";
 
-        cin >> roll;
+        std::cin >> roll;
     } while (roll < 0 || roll > MAX_ROLLS);
 
     return roll;
@@ -69,8 +69,8 @@ int MatrixStrategy::get_roll_num(int score0, int score1) {
     return rolls[score0][score1];
 }
 
-bool MatrixStrategy::load_from_file(string path) {
-    ifstream ifs(path);
+bool MatrixStrategy::load_from_file(std::string path) {
+    std::ifstream ifs(path);
     if (!ifs) return false;
 
     for (int i = 0; i < GOAL; ++i) {
@@ -84,8 +84,8 @@ bool MatrixStrategy::load_from_file(string path) {
     return true;
 }
 
-void MatrixStrategy::write_to_file(string path, bool pyformat) {
-    ofstream ofs(path);
+void MatrixStrategy::write_to_file(std::string path, bool pyformat) {
+    std::ofstream ofs(path);
 
     if (pyformat) ofs << "def strategy(score0, score1):\n  return [[";
 

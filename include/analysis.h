@@ -21,36 +21,36 @@
     public:
         /* Creates a LearningStrategy from an existing strategy. 
            If overwrite is true, immediately writes the strategy to the specified path.*/
-        LearningStrategy(IStrategy & strat, string path = "", bool overwrite=true) : MatrixStrategy(strat) {
+        LearningStrategy(IStrategy & strat, std::string path = "", bool overwrite=true) : MatrixStrategy(strat) {
             file_path = path;
             if (overwrite && path != "") write_to_file(path);
         }
 
         /* Creates a LearningStrategy from a matrix. 
            If overwrite is true, immediately writes the strategy to the specified path.*/
-        LearningStrategy(int ** mat, string path = "", bool overwrite=true) : MatrixStrategy(mat) {
+        LearningStrategy(int ** mat, std::string path = "", bool overwrite=true) : MatrixStrategy(mat) {
             file_path = path;
             if (overwrite && path != "") write_to_file(path);
         }
 
         // Creates a LearningStrategy by loading a strategy from a path
-        LearningStrategy(string path = "") : MatrixStrategy() {
+        LearningStrategy(std::string path = "") : MatrixStrategy() {
             file_path = path;
             load_from_file(path);
         }
 
         /* Begin training against the specified opponent strategy, for the specified number of rounds */
         void learn(IStrategy & oppo_strat, int number = GOAL * GOAL,
-            pair<int, int>focus = pair<int, int>(GOAL-1, GOAL-1), volatile int * interrupt = NULL,
+            std::pair<int, int>focus = std::pair<int, int>(GOAL-1, GOAL-1), volatile int * interrupt = NULL,
             bool quiet = false, int announce_interval = 10, int wr_interval = 100);
 
         /* Takes a pair representing the current "focus" point of training and returns the next "focus" point
            in the sequence. Will automatically go over all focus points */
-        static pair<int, int> next_focus(pair<int, int> focus);
+        static std::pair<int, int> next_focus(std::pair<int, int> focus);
 
     private:
         // used for auto-saving during training
-        string file_path;
+        std::string file_path;
 
     }; // class LearningStrategy
 
@@ -76,8 +76,8 @@
     /* Run a round-robin tournament. Returns a vector of pairs where
        the first element of each item is the number of wins,
        and the second is the name of the player */
-    vector<pair<int, string> *> round_robin(vector<pair<string, IStrategy *>> strats,
-        void announcer(int games_played, int games_remaining, int high, string high_strat) = NULL,
+    std::vector<std::pair<int, std::string> *> round_robin(std::vector<std::pair<std::string, IStrategy *>> strats,
+        void announcer(int games_played, int games_remaining, int high, std::string high_strat) = NULL,
         int announcer_interval = 100,
         double margin = 0.500001, int threads = 4, volatile int * interrupt = NULL);
 

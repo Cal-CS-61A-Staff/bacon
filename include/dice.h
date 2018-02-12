@@ -3,8 +3,6 @@
 #ifndef DICE_H
     #define DICE_H
 
-using namespace std;
-
 // dice stuff
 
 // Interface for al dice types
@@ -32,7 +30,7 @@ private:
 // A die that deterministically cycles through a list of possible options
 class TestDice : public IDice {
 public:
-    vector<int> choices;
+    std::vector<int> choices;
     int index = 0;
         
     TestDice(int n_args, ...) {

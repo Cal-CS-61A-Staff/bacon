@@ -1,6 +1,5 @@
 ﻿#include "stdafx.h"
 #include "hog.h"
-using namespace std;
 
 // Implementation of game of hog 
 
@@ -35,7 +34,7 @@ int free_bacon(int score) {
     int max_digit = 0;
 
     while (score > 0) {
-        max_digit = max(score % 10, max_digit);
+        max_digit = std::max(score % 10, max_digit);
         score /= 10;
     }
 
@@ -66,7 +65,7 @@ int is_time_trot(int turn_num, int rolls) {
     return turn_num % 8 == rolls;
 }
 
-pair<int, int> play(IStrategy& strategy0, IStrategy& strategy1, int score0, int score1, 
+std::pair<int, int> play(IStrategy& strategy0, IStrategy& strategy1, int score0, int score1, 
                     IDice& dice, int goal, int starting_turn) {
 
     int player = 0, turn_num = starting_turn;
@@ -85,7 +84,7 @@ pair<int, int> play(IStrategy& strategy0, IStrategy& strategy1, int score0, int 
         }
 
         if (is_swap(score0, score1)) {
-            swap(score0, score1);
+            std::swap(score0, score1);
         }
 
         if (is_time_trot(turn_num, rolls) && ! last_time_trot) { // implementation of time trot
@@ -99,5 +98,5 @@ pair<int, int> play(IStrategy& strategy0, IStrategy& strategy1, int score0, int 
         ++turn_num;
     }
 
-    return pair<int, int>(score0, score1);
+    return std::pair<int, int>(score0, score1);
 }

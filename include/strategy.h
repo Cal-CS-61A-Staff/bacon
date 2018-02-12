@@ -5,15 +5,16 @@
 
 #ifndef STRATEGY_H
     #define STRATEGY_H
-
-    using namespace std;
-
+    
     // Interface for all strategies
     class IStrategy {
     public:
         /* Get what this strategy would roll at a given set of scores.
           (where score0 is the current player's score, score1 is the opponent's score)*/
         virtual int operator()(int score0, int score1) =0;
+        
+        // Virtual destructor
+        virtual ~IStrategy() {};
     };
 
     // A strategy that always rolls the same number of die
@@ -76,10 +77,10 @@
         int get_roll_num(int score0, int score1); 
 
         // Load the strategy matrix from a file
-        bool load_from_file(string path);
+        bool load_from_file(std::string path);
 
         // Write the strategy matrix to a file
-        void write_to_file(string path, bool pyformat = false);
+        void write_to_file(std::string path, bool pyformat = false);
 
         int operator() (int score0, int score1) {
             return rolls[score0][score1];

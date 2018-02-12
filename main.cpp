@@ -105,7 +105,7 @@ namespace {
             if (no_human && i.first == "human") continue;
             std::cout << i.first << "  ";
         }
-    }
+    } // list_strats
 
     // ask for a path
     inline int ask_for_path(char * c, int len = 256) {
@@ -125,7 +125,7 @@ namespace {
              
              return !std::cin.fail();
         }
-    }
+    } // ask_for_path
 
     // ask the user for a strategy name
     inline IStrategy & ask_for_strategy(const std::string & msg, bool no_human = false) {
@@ -155,7 +155,7 @@ namespace {
         } while ((no_human && name == "human") || strat.find(name) == strat.end());
 
         return *strat[name];
-    }
+    } // ask_for_strategy
 
     // delete and erase an "extra" strategy, making sure to release memory
     inline void delete_erase_extra_strat(std::string name) {
@@ -213,7 +213,7 @@ namespace {
         }
 
         ext_ifs.close();
-    }
+    } // load_exts
 
     // write out extra strategies to the path specified
     void write_exts(const std::string & path) {
@@ -239,7 +239,7 @@ namespace {
 
         ext_ofs.flush();
         ext_ofs.close();
-    }
+    } // write_exts
 
     /* set up a strategy with the name for use inside the console 
        (delete old strat with same name, add to 'strat', insert to 'extra_strats', save all strats to file, etc.) */
@@ -257,7 +257,7 @@ namespace {
             print_hline();
             std::cout << std::endl;
         }
-    }
+    } // insert_strat_ptr
 
     // List all available commands (hardcoded)
     inline void show_available_commands(void) {
@@ -268,7 +268,7 @@ namespace {
     list (-ls) \t\t import (-i [-f]) \t export[py] (-e [-f]) \t clone (-c)\n\
     remove (-rm) \t help (-h) \t\t version (-v) \t\t option (-o) \t\t\n\
     \t\t\t\t\t\t time \t\t\t exit" << std::endl << std::endl;
-    }
+    } // show_available_commands
 
     // Announcer for round robin tournament
     void announcer(int games_played, int games_remaining, int high, std::string high_strat) {
@@ -892,7 +892,7 @@ namespace {
             }
         }
 
-    }
+    } // exec
 
     inline void init_console(void) {
         srand((unsigned int)time(NULL));
@@ -934,9 +934,8 @@ namespace {
             // allow removal of final strategy
             extra_strats.insert("final");
         }
-    }
-
-}
+    } // init_console
+} // anonymous namespace
 
 int main(int argc, char * argv[]) {
     signal(SIGINT, int_handler);
@@ -1016,4 +1015,4 @@ int main(int argc, char * argv[]) {
     }
 
     return 0;
-}
+} // main

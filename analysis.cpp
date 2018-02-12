@@ -801,5 +801,3 @@ void draw_strategy_diagram(IStrategy & strat) {
 
     std::cout << "\nLEGEND:  [  ] = 0  [::] = 1,2  [||] = 3,4  [%%] = 5,6  [\u2593\u2593] = 7,8  [\u2588\u2588] = 9,10." << std::endl;
 }
-
-

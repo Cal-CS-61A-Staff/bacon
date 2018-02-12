@@ -397,7 +397,12 @@ MatrixStrategy * create_final_strat(bool quiet) {
 
     for (int i = 0; i < GOAL; ++i) {
         for (int j = 0; j < GOAL; ++j) {
-            opt_strat->set_roll_num(i, j, compute_win_rates(i, j, 1).second);
+            if (j % 4 == 0 || i % 4 == 0){
+                opt_strat->set_roll_num(i, j, 4);
+            }
+            else{
+                opt_strat->set_roll_num(i, j, compute_win_rates(i, j, 1).second);
+            }
         }
     }
 

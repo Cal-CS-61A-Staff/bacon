@@ -21,7 +21,7 @@ This project has two main components: `bacon` and `hogconv[.py]`.
 
 `hogconv.py` is a Python script that converts Hog strategies written in Python (containing final_strategy and TEAM_NAME as specified in the [Hog Contest](https://cs61a.org/proj/hog_contest/)) to `.strat` files which `bacon` can understand.
 
-## Quickstart
+## Installation
 
 ### Linux
 
@@ -79,7 +79,7 @@ Just like with Linux, `cd` into the `bacon` directory and enter `make`.
 Do not use `make install` however. Instead, simply copy the `bacon.exe` file inside the `bin/` directory and `hogconv.py` inside the root directory to somewhere convenient and run them.
 
 
-### Running Simulated Contests
+## Running Simulated Contests
 
 Follow these steps to run a simulated contest.
 

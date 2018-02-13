@@ -19,10 +19,14 @@ if len(sys.argv) <= 1:
     print ("Example: python3 contest.py -n hog_contest.py -o results.txt ~/hog_contest/")
     sys.exit(0)
     
-def execute(command):
+def execute(command, quiet = False):
     print ("---------------------------------")
     print ("contest.py: Executing " + command)
-    process = subprocess.Popen(command, shell=True)
+    if quiet:
+        FNULL = open(os.devnull, 'w')
+        process = subprocess.Popen(command, shell=True, stdout=FNULL)
+    else:
+        process = subprocess.Popen(command, shell=True)
     process.wait()
     
 # clear and recreate strategy directory
@@ -64,7 +68,7 @@ for root, subdirs, files in os.walk(STRAT_DIR):
     for file in files:
         strat_paths.append('"' + join(root, file) + '"')
         
-execute(BACON_PATH + ' -rm all')
+execute(BACON_PATH + ' -rm all', True)
 execute(BACON_PATH + ' -i -f ' + ' '.join(strat_paths))
 execute(BACON_PATH + ' -t ' + str(N_THREADS) + ' -f ' + OUTPUT_PATH)
 

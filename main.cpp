@@ -23,10 +23,13 @@ namespace {
     // Root directory for storing files (Windows)
     const char * APPDATA = std::getenv("APPDATA");
     const std::string STORAGE_ROOT = std::string(APPDATA) + "\\Bacon\\";
-    #else
-    // Root directory for storing files (Unix)
+    #elif __linux__
+    // Root directory for storing files (Linux)
     const char * HOME = std::getenv("HOME");
     const std::string STORAGE_ROOT = std::string(HOME) + "/.bacon/";
+    #else
+    // Root directory for storing files (Other)
+    const std::string STORAGE_ROOT = "";
     #endif
 
     // Path to load extra strategies from

@@ -297,7 +297,7 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 
 `swap`: The 'swap' strategy. Students implemented this as part of the Hog project. Applies Free Bacon and Swine Swap where beneficial.
 
-`final`: The 'final' strategy calculated using DP. this was my initial submission in the Hog Contest. Useful as a benchmark. Note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
+`final`: The 'final' strategy calculated using DP. This was my initial submission in the Hog Contest (NOTE: just to be safe, I have sabotaged this a bit so it's not that good; also, it's different from my winning submission.) Useful as a benchmark. Note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
 
 `always0` ... `always10`: Always rolls n dice.
 

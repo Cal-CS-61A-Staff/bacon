@@ -79,11 +79,13 @@ Just like with Linux, `cd` into the `bacon` directory and enter `make`.
 Do not use `make install` however. Instead, simply copy the `bacon.exe` file inside the `bin/` directory and `hogconv.py` inside the root directory to somewhere convenient and run them.
 
 
-### Running Simulated Tournaments
+### Running Simulated Contests
 
-Follow these steps to run simulated a tournament. Replace `hogconv.py` and `bin/bacon` below with the path to the script/binary on your system as appropriate.
+Follow these steps to run a simulated contest.
 
-1. Convert the student's Python submissions to .strat: 
+Replace `hogconv.py` and `bin/bacon` below with the path to the script/binary on your system as appropriate.
+
+1. Convert the students' submissions (*.py) to *.strat: 
 ```sh
 python hogconv.py -o strat [student_strategies/*.py hog_contest.py foo.py]
 ```
@@ -100,7 +102,7 @@ bin/bacon -rm all
 bin/bacon -i -f strat/*
 ```
 
-4. Simulate tournament (you can replace '4' below with number of threads desired):
+4. Simulate tournament (you can replace '4' below with any number of threads desired):
 ```sh
 bin/bacon -t 4 -f results.txt
 ```

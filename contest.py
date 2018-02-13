@@ -1,6 +1,6 @@
 #!/bin/python3
 
-import sys, os, subprocess
+import sys, os, subprocess, shutil
 from os.path import join
 
 FILE_NAME = 'hog_contest.py'
@@ -24,6 +24,10 @@ def execute(command):
     print ("contest.py: Executing " + command)
     process = subprocess.Popen(command, shell=True)
     process.wait()
+    
+# clear and recreate strategy directory
+shutil.rmtree(STRAT_DIR)
+os.makedirs(STRAT_DIR)
     
 subm_paths = []
 strat_paths = []
@@ -60,6 +64,7 @@ for root, subdirs, files in os.walk(STRAT_DIR):
     for file in files:
         strat_paths.append('"' + join(root, file) + '"')
         
+execute(BACON_PATH + ' -rm all')
 execute(BACON_PATH + ' -i -f ' + ' '.join(strat_paths))
 execute(BACON_PATH + ' -t ' + str(N_THREADS) + ' -f ' + OUTPUT_PATH)
 

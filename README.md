@@ -21,6 +21,8 @@ This project has two main components: `bacon` and `hogconv[.py]`.
 
 `hogconv.py` is a Python script that converts Hog strategies written in Python (containing final_strategy and TEAM_NAME as specified in the [Hog Contest](https://cs61a.org/proj/hog_contest/)) to `.strat` files which `bacon` can understand.
 
+`contest.py` is a Python script for simulating the Hog Contest in one command.
+
 ## Installation
 
 ### Linux
@@ -81,13 +83,26 @@ Do not use `make install` however. Instead, simply copy the `bacon.exe` file ins
 
 ## Running Simulated Contests
 
-Follow these steps to run a simulated contest.
+### Simulating Using contest.py
+
+`cd` into the project root directory and simply run:
+`python3 contest.py SUBMISSION_DIR`
+
+Where SUBMISSION_DIR is the path to the base directory containing the student submissions.
+The script will recurse to each subdirectory of SUBMISSION_DIR and look for hog_contest.py, each of which is converted.
+The contest result will be available in `results.txt`.
+
+You may optionally use `-t N` to specify the number of threads (default 4),
+`-n NAME` to specify the names of the submission files (default hog_contest.py), or
+`-o PATH` to specify the path to the output file (default results.txt)
+
+### Simulating Manually:
 
 Replace `hogconv.py` and `bin/bacon` below with the path to the script/binary on your system as appropriate.
 
 1. Convert the students' submissions (*.py) to *.strat: 
 ```sh
-python hogconv.py -o strat [student_strategies/*.py hog_contest.py foo.py]
+python3 hogconv.py -o strat [student_strategies/*.py hog_contest.py foo.py]
 ```
  list the `hog_contest.py` files in the [] part (don't actually include the []!) according to how the student strategies are laid out.
 

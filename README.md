@@ -15,13 +15,13 @@ Moreover, the tournament procedure is multithreaded and may be split up to run o
 A test tournament with 100 random strategies (4950 games) finished in less than **1.5 minutes** when ran on 12 threads on OCF, a lot faster than the old contest system, which took almost a week to compute the results of a tournament with the same number of strategies. Another test tournament with 132 random strategies (8646 games) finished in less than **11.5 minutes** running on 2 threads.
 
 ### Components
-This project has two main components: `bacon` and `hogconv[.py]`.
+This project has three main components: `bacon`, `hogconv.py`, `contest.py`.
 
 `bacon` is the main binary, used for computing exact win rates, analyzing strategies, running tournaments etc.
 
 `hogconv.py` is a Python script that converts Hog strategies written in Python (containing final_strategy and TEAM_NAME as specified in the [Hog Contest](https://cs61a.org/proj/hog_contest/)) to `.strat` files which `bacon` can understand.
 
-`contest.py` is a Python script for simulating the Hog Contest in one command.
+`contest.py` is a Python script for simulating the entire Hog Contest in one command.
 
 ## Installation
 
@@ -297,7 +297,7 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 
 `swap`: The 'swap' strategy. Students implemented this as part of the Hog project. Applies Free Bacon and Swine Swap where beneficial.
 
-`final`: The 'final' strategy calculated using DP. This was my initial submission in the Hog Contest (NOTE: just to be safe, I have sabotaged this a bit so it's not that good; also, it's different from my winning submission.) Useful as a benchmark. Note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
+`final`: The 'final' strategy calculated using DP. This was my initial submission in the Hog Contest (NOTE: just to be safe, I have sabotaged this a bit so it's not that good; also, it's different from my winning submission.) Useful as a benchmark. Also note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
 
 `always0` ... `always10`: Always rolls n dice.
 

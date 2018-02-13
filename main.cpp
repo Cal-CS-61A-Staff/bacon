@@ -193,11 +193,13 @@ namespace {
         std::ifstream ext_ifs(EXT_PATH);
 
         std::string header = "", name = "";
-
+        
         ext_ifs >> header;
 
         while (header == "strategy") {
-            ext_ifs >> name;
+            while (ext_ifs.peek() == ' ')
+                ext_ifs.get();
+            std::getline(ext_ifs, name);
             MatrixStrategy * es = new MatrixStrategy();
             for (int i = 0; i < GOAL; ++i) {
                 for (int j = 0; j < GOAL; ++j) {

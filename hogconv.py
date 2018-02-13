@@ -7,7 +7,7 @@ GOAL = 100 # goal score for Hog
 STRATEGY_FUNC_ATTR = 'final_strategy' # attribute of student's module that contains the strategy function
 TEAM_NAME_ATTR = 'TEAM_NAME' # attribute of student's module that contains the team name
 
-TEAM_NAME_MAX_LEN = 50 # max length for team names (set to 0 to remove limit)
+TEAM_NAME_MAX_LEN = 100 # max length for team names (set to 0 to remove limit)
 DEF_EMPTY_TEAM_NAME = "(empty string)" # name for teams with an empty team name
 DEF_LONG_TEAM_NAME = "(team name longer than 50 chars)" # name for teams with team names that are too long
 

@@ -30,7 +30,11 @@ def execute(command, quiet = False):
     process.wait()
     
 # clear and recreate strategy directory
-shutil.rmtree(STRAT_DIR)
+if os.path.exists(STRAT_DIR):
+    if os.path.isdir(STRAT_DIR):
+        shutil.rmtree(STRAT_DIR)
+    else:
+        os.remove(STRAT_DIR)
 os.makedirs(STRAT_DIR)
     
 subm_paths = []

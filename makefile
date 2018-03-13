@@ -23,7 +23,7 @@ $(OUTPUTNAME) : $(OBJ)
 
 .PHONY: clean install
 	
-clean :
+clean:
 	rm -rf $(ODIR)/*
 	rm -rf .vs
 	rm -f bin/*.pdb
@@ -32,11 +32,15 @@ clean :
 	rm -f bin/*.ilk
 	
 install:
-	rm -f /usr/bin/$(OUTPUTNAME)
-	cp $(OUTPUTDIR)$(OUTPUTNAME) /usr/bin
-	cp $(HOGCONV) /usr/bin/$(HOGCONVBIN)
-	chmod +x /usr/bin/$(HOGCONVBIN)
+	rm -f /usr/local/bin/$(OUTPUTNAME)
+	cp $(OUTPUTDIR)$(OUTPUTNAME) /usr/local/bin
+	cp $(HOGCONV) /usr/local/bin/$(HOGCONVBIN)
+	chmod +x /usr/local/bin/$(HOGCONVBIN)
 
+uninstall:
+	rm -f /usr/local/bin/$(OUTPUTNAME)
+	rm -f /usr/local/bin/$(HOGCONVBIN)
+    
 install_user:
 	rm -f ~/bin/$(OUTPUTNAME)
 	cp $(OUTPUTDIR)$(OUTPUTNAME) ~/bin

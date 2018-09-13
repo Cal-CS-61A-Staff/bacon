@@ -12,7 +12,7 @@ The core portion of Bacon is written entirely in C++ and is highly optimized.
 On average, the computation of the exact theoretical winrate between two strategies takes approximately 100 milliseconds.
 
 Moreover, the tournament procedure is multithreaded and may be split up to run on an arbitrary number of threads. 
-A test tournament with 100 random strategies (4950 games) finished in less than **1.5 minutes** when ran on 12 threads on OCF, a lot faster than the old contest system, which took almost a week to compute the results of a tournament with the same number of strategies. Another test tournament with 132 random strategies (8646 games) finished in less than **11.5 minutes** running on 2 threads.
+A test tournament with 100 random strategies (4950 games) finished in less than minutes when ran on 12 threads on an OCF computer, a lot faster than the old contest system, which took days to compute the results of a tournament with the same number of strategies. Another test tournament with 132 random strategies (8646 games) finished in less than **11.5 minutes** running on 2 threads.
 
 ### Components
 This project has three main components: `bacon`, `hogconv.py`, `contest.py`.
@@ -167,7 +167,7 @@ To obtain a list of all the strategies, use:
 bacon -ls
 ```
 
-** An important note: ** to enter strategies whose names contain spaces, you must enter \ (backslash) before each space. For example, to
+**An important note:** to enter strategies whose names contain spaces, you must enter \ (backslash) before each space. For example, to
 enter "My Strategy" you would enter "My\ Strategy" instead.
 
 

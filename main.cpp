@@ -88,9 +88,9 @@ namespace {
             std::cin >> read_to;
             if (std::cin.fail()) return false;
             while (read_to.size() && read_to[read_to.size() - 1] == '\\') {
-                read_to[read_to.size() - 1] = " ";
+                read_to[read_to.size() - 1] = ' ';
                 std::cin >> tmp;
-                read_to += tmp
+                read_to += tmp;
                 if (std::cin.fail()) return false;
             }
             return true;
@@ -98,7 +98,7 @@ namespace {
         else{
             buf >> read_to;
             while (read_to.size() && read_to[read_to.size() - 1] == '\\') {
-                read_to[read_to.size() - 1] = " ";
+                read_to[read_to.size() - 1] = ' ';
                 buf >> tmp;
                 read_to += tmp;
             }
@@ -329,8 +329,8 @@ namespace {
 
         // the game of Hog
         if (cmd == "-p" || cmd == "play") {
-            AnnouncerStrategy as1 = AnnouncerStrategy(ask_for_strategy("\nPlayer 0 strategy name:"), 0);
-            AnnouncerStrategy as2 = AnnouncerStrategy(ask_for_strategy("\nPlayer 1 strategy name:"), 1);
+            AnnouncerStrategy as1 = AnnouncerStrategy(ask_for_strategy("\nPlayer 0 strategy name (enter \\ before spaces):"), 0);
+            AnnouncerStrategy as2 = AnnouncerStrategy(ask_for_strategy("\nPlayer 1 strategy name (enter \\ before spaces):"), 1);
             IStrategy & s0 = as1;
             IStrategy & s1 = as2;
 
@@ -435,7 +435,7 @@ namespace {
             int success = read_token(number);
             if (!success) return;
 
-            IStrategy & s0 = ask_for_strategy("\nTraining opponent strategy name:", true);
+            IStrategy & s0 = ask_for_strategy("\nTraining opponent strategy name (enter \\ before spaces):", true);
 
             std::cout << std::endl;
 
@@ -462,8 +462,8 @@ namespace {
 
             bool argmode = has_buf();
 
-            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name:", true);
-            IStrategy & s1 = ask_for_strategy("\nPlayer 1 strategy name:", true);
+            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name (enter \\ before spaces):", true);
+            IStrategy & s1 = ask_for_strategy("\nPlayer 1 strategy name (enter \\ before spaces):", true);
 
             double rate = average_win_rate(s0, s1,
                 ((cmd == "-r" || cmd == "winrate") ? -1 : ((cmd == "-r1" || cmd == "winrate1") ? 1 : 0)),
@@ -476,8 +476,8 @@ namespace {
 
             bool argmode = has_buf();
 
-            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name:", true);
-            IStrategy & s1 = ask_for_strategy("\nPlayer 1 strategy name:", true);
+            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name (enter \\ before spaces):", true);
+            IStrategy & s1 = ask_for_strategy("\nPlayer 1 strategy name (enter \\ before spaces):", true);
 
             int samples = 200000;
             if (!has_buf() && !argmode)
@@ -541,7 +541,7 @@ namespace {
         }
 
         else if (cmd == "-g" || cmd == "graph") {
-            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name:", true);
+            IStrategy & s0 = ask_for_strategy("\nPlayer 0 strategy name (enter \\ before spaces):", true);
             std::cout << std::endl;
             draw_strategy_diagram(s0);
             std::cout << std::endl;
@@ -613,7 +613,7 @@ namespace {
                 if (cmd == "exportpy") std::cout << "(Python Format)\n";
 
                 if (!has_buf()) {
-                    std::cout << "\nPlease enter the name of the strategy to export (enter _cancel to exit):\n";
+                    std::cout << "\nPlease enter the name of the strategy to export (enter _cancel to exit; any space should be preceded with \\):\n";
                     print_hline();
 
                     std::cout << "Available strategies:\n";
@@ -651,6 +651,7 @@ namespace {
                 }
                 else {
                     std::cout << "\nStrategy not found. (Enter _cancel to exit)" << std::endl;;
+                    if (!interactive_mode) break;
                 }
 
             }
@@ -792,7 +793,7 @@ namespace {
             while (name.length() == 0) {
                 if (!has_buf())
                     std::cout << "\nName to use for the cloned strategy\n" <<
-                    "(Warning: using the name of an existing strategy will override that strategy!):\n\n";
+                    "(Warning: using the name of an existing strategy will override that strategy! Enter \\ before any space):\n\n";
 
                 int success = read_token(name);
                 if (!success || interrupt) {interrupt =  false; return;}

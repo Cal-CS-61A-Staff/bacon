@@ -1,7 +1,7 @@
 ## Overview
 
 
-### What does Bacon do?
+### Overview
 
 Bacon is an an analysis program for Hog, a dice game from the 
 CS61A class project [Hog](https://cs61a.org/proj/hog/). Bacon was created for the [Hog Contest](https://cs61a.org/proj/hog_contest/), which is a Hog strategy contest students are encouraged to participate in.
@@ -149,17 +149,17 @@ bacon -r strategy0 strategy1
 
 Where `strategy0` and `strategy1` are the names of the strategies, for instance, try:
 ```sh
-bacon -r final swap
+bacon -r _final _swap
 ```
 
 You can also simulate a game of hog between two strategies:
 ```sh
-bacon -p final swap
+bacon -p _final _swap
 ```
 
 Or play against one of the strategies yourself using the `human` built-in strategy:
 ```sh
-bacon -p human final
+bacon -p _human _final
 ```
 
 To obtain a list of all the strategies, use:
@@ -167,26 +167,30 @@ To obtain a list of all the strategies, use:
 bacon -ls
 ```
 
+** An important note: ** to enter strategies whose names contain spaces, you must enter \ (backslash) before each space. For example, to
+enter "My Strategy" you would enter "My\ Strategy" instead.
+
+
 #### Other cool things you can do:
 
 Draw a diagram of a strategy (your console must use an appropriate monospaced font for this to work):
 ```sh
-bacon -g final
+bacon -g _final
 ```
 
 Compare two strategies:
 ```sh
-bacon -d final swap
+bacon -d _final _swap
 ```
 
 Compare two strategies graphically:
 ```sh
-bacon -gd final swap
+bacon -gd _final _swap
 ```
 
 Export a strategy:
 ```sh
-bacon -e final -f mystrategy.strat
+bacon -e _final -f mystrategy.strat
 ```
 
 Import strategies (generated with `hogconv.py` or exported with `-e`):
@@ -289,21 +293,21 @@ You can get a list of commands just like the one below by entering `bacon -h` in
 
 ### List of built-in strategies
 
-`human`: Asks you what to roll at each round. Use this to play against your strategies for fun.
+`_human`: Asks you what to roll at each round. Use this to play against your strategies for fun.
 
-`default`: Always rolls 4. The baseline strategy.
+`_default`: Always rolls 4. The baseline strategy.
 
-`random`: Rolls a random number of dice at each round (not legal in contest, but useful for testing). You may create a random, but fixed, strategy for analysis using `mkrandom`.
+`_random`: Rolls a random number of dice at each round (not legal in contest, but useful for testing). You may create a random, but fixed, strategy for analysis using `mkrandom`.
 
-`swap`: The 'swap' strategy. Students implemented this as part of the Hog project. Applies Free Bacon and Swine Swap where beneficial.
+`_swap`: The 'swap' strategy. Students implemented this as part of the Hog project. Applies Free Bacon and Swine Swap where beneficial.
 
-`final`: The 'final' strategy calculated using DP. This was my initial submission in the Hog Contest (NOTE: just to be safe, I have sabotaged this a bit so it's not that good; also, it's different from my winning submission.) Useful as a benchmark. Also note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
+`_final`: The 'final' strategy calculated using DP. This was my initial submission in the Hog Contest (NOTE: just to be safe, I have sabotaged this a bit so it's not that good; also, it's different from my winning submission.) Useful as a benchmark. Also note that this is not technically a built-in strategy and may be removed. To recompute it, use `mkfinal`.
 
-`always0` ... `always10`: Always rolls n dice.
+`_always0` ... `_always10`: Always rolls n dice.
 
-`swap_visual`: Not a real strategy, but may be used with `-g`: `bacon -g swap_visual` to visualize the density of scores qualifying for Swine Swap across the universe of all scores.
+`_swap_visual`: Not a real strategy, but may be used with `-g`: `bacon -g swap_visual` to visualize the density of scores qualifying for Swine Swap across the universe of all scores.
 
-`learn`: A special strategy which will learn and improve through training. Run the `train` command to train this strategy against another strategy. You may also run `learnfrom` to override `learn` with another strategy from which training will start.
+`_learn`: A special strategy which will learn and improve through training. Run the `train` command to train this strategy against another strategy. You may also run `learnfrom` to override `learn` with another strategy from which training will start.
 
 ## hogconv: Detailed Usage Guide
 

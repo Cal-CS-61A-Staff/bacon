@@ -21,14 +21,14 @@
     public:
         /* Creates a LearningStrategy from an existing strategy. 
            If overwrite is true, immediately writes the strategy to the specified path.*/
-        LearningStrategy(IStrategy & strat, std::string path = "", bool overwrite=true) : MatrixStrategy(strat) {
+        LearningStrategy(IStrategy & strat, std::string path = "", bool overwrite=true) : MatrixStrategy(strat, LEARNING_STRATEGY_NAME) {
             file_path = path;
             if (overwrite && path != "") write_to_file(path);
         }
 
         /* Creates a LearningStrategy from a matrix. 
            If overwrite is true, immediately writes the strategy to the specified path.*/
-        LearningStrategy(int ** mat, std::string path = "", bool overwrite=true) : MatrixStrategy(mat) {
+        LearningStrategy(int ** mat, std::string path = "", bool overwrite=true) : MatrixStrategy(mat, LEARNING_STRATEGY_NAME) {
             file_path = path;
             if (overwrite && path != "") write_to_file(path);
         }

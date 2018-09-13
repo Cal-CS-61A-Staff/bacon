@@ -81,9 +81,32 @@ namespace {
         return (!buf.str().empty()) || std::cin.rdbuf()->in_avail() > 1;
     }
 
-    template <typename T>
     // read in a name from the virtual buffer or, if it is not availble, the cin buffer
-    inline int read_token(T & read_to) {
+    inline int read_token(std::string & read_to) {
+        std::string tmp;
+        if (buf.str().empty()){
+            std::cin >> read_to;
+            if (std::cin.fail()) return false;
+            while (read_to.size() && read_to[read_to.size() - 1] == '\\') {
+                read_to[read_to.size() - 1] = " ";
+                std::cin >> tmp;
+                read_to += tmp
+                if (std::cin.fail()) return false;
+            }
+            return true;
+        }
+        else{
+            buf >> read_to;
+            while (read_to.size() && read_to[read_to.size() - 1] == '\\') {
+                read_to[read_to.size() - 1] = " ";
+                buf >> tmp;
+                read_to += tmp;
+            }
+            return true;
+        }
+    }
+
+    inline int read_token(int & read_to) {
         if (buf.str().empty()){
             std::cin >> read_to;
             return !std::cin.fail();
@@ -93,6 +116,24 @@ namespace {
             return true;
         }
     }
+
+
+    // read in a line from the virtual buffer or, if it is not availble, the cin buffer
+    inline int read_line(std::string & read_to) {
+        if (buf.str().empty()) {
+    #ifdef _WIN32
+            if (interactive_mode) // fix for Windows, do not need to ignore outside interactive mode
+    #endif
+                std::cin.ignore(); // ignore newline
+            std::getline(std::cin, read_to);
+            return !std::cin.fail();
+        }
+        else{
+            std::getline(buf, read_to);
+            return true;
+        }
+    }
+
 
     // print a horizontal line
     inline void print_hline() {
@@ -120,7 +161,7 @@ namespace {
         }
         else {
     #ifdef _WIN32
-            if (interactive_mode) // fix for Windows, do not need to ignore in interactive mode
+            if (interactive_mode) // fix for Windows, do not need to ignore outside interactive mode
     #endif
                 std::cin.ignore(); // ignore newline
                 
@@ -200,7 +241,7 @@ namespace {
             while (ext_ifs.peek() == ' ')
                 ext_ifs.get();
             std::getline(ext_ifs, name);
-            MatrixStrategy * es = new MatrixStrategy();
+            MatrixStrategy * es = new MatrixStrategy(name);
             for (int i = 0; i < GOAL; ++i) {
                 for (int j = 0; j < GOAL; ++j) {
                     int tmp; ext_ifs >> tmp;
@@ -248,9 +289,9 @@ namespace {
 
     /* set up a strategy with the name for use inside the console 
        (delete old strat with same name, add to 'strat', insert to 'extra_strats', save all strats to file, etc.) */
-    inline void insert_strat_ptr(IStrategy * cs, std::string name, bool print_strats = false) {
+    inline void insert_strat_ptr(IStrategy * strategy, std::string name, bool print_strats = false) {
         delete_erase_extra_strat(name);
-        strat[name] = cs;
+        strat[name] = strategy;
 
         extra_strats.insert(name);
         write_exts(EXT_PATH);
@@ -310,7 +351,7 @@ namespace {
             std::vector<std::pair<std::string, IStrategy *> > contestants;
 
             for (auto name : extra_strats) {
-                if (name != "final")
+                if (name != "_final")
                     contestants.push_back(make_pair(name, strat[name]));
             }
 
@@ -510,19 +551,19 @@ namespace {
             IStrategy & s0 = ask_for_strategy("\nName of strategy 1:", true);
             IStrategy & s1 = ask_for_strategy("\nName of strategy 2:", true);
 
-            MatrixStrategy * cs = new MatrixStrategy();
+            MatrixStrategy * strategy = new MatrixStrategy("__graphdiff_tmp");
 
             for (int i = 0; i < GOAL; ++i) {
                 for (int j = 0; j < GOAL; ++j) {
-                    cs->set_roll_num(i, j, abs(s1(i, j) - s0(i, j)));
+                    strategy->set_roll_num(i, j, abs(s1(i, j) - s0(i, j)));
                 }
             }
 
             std::cout << std::endl;
-            draw_strategy_diagram(*cs);
+            draw_strategy_diagram(*strategy);
             std::cout << std::endl;
 
-            delete cs;
+            delete strategy;
         }
 
         else if (cmd == "mkfinal") {
@@ -550,7 +591,7 @@ namespace {
             if (interrupt) {interrupt = false; return;}
 
             RandomStrategy rs = RandomStrategy();
-            MatrixStrategy * rand_strat = new MatrixStrategy(rs);
+            MatrixStrategy * rand_strat = new MatrixStrategy(rs, "_random");
 
             std::cout << "Randomized strategy saved to " << name << "." << std::endl;
             insert_strat_ptr(rand_strat, name, true);
@@ -572,7 +613,7 @@ namespace {
                 if (cmd == "exportpy") std::cout << "(Python Format)\n";
 
                 if (!has_buf()) {
-                    std::cout << "\nPlease enter the name of the strategy to export (enter cancel to exit):\n";
+                    std::cout << "\nPlease enter the name of the strategy to export (enter _cancel to exit):\n";
                     print_hline();
 
                     std::cout << "Available strategies:\n";
@@ -581,12 +622,12 @@ namespace {
                 }
 
                 int success = read_token(name);
-                if (!success || name == "cancel" || interrupt) break;
+                if (!success || name == "_cancel" || interrupt) break;
                 
                 auto it = strat.find(name);
                 if (it != strat.end()) {
                     // found!
-                    MatrixStrategy tmpcs = MatrixStrategy(*it->second);
+                    MatrixStrategy tmpcs = MatrixStrategy(*it->second, name);
 
                     if (output_paths.size() == 0) std::cout << "\nExport file path:" << std::endl;
 
@@ -609,7 +650,7 @@ namespace {
                     break;
                 }
                 else {
-                    std::cout << "\nStrategy not found. (Enter cancel to exit)" << std::endl;;
+                    std::cout << "\nStrategy not found. (Enter _cancel to exit)" << std::endl;;
                 }
 
             }
@@ -641,20 +682,22 @@ namespace {
                     if (pos2 != name.npos) name = name.substr(0, pos2);
                 }
 
-                MatrixStrategy * cs = new MatrixStrategy();
+                MatrixStrategy * strategy = new MatrixStrategy();
 
-                if (cs->load_from_file(path)) {
-                    while (name.length() == 0) {
-                        std::cout << "\nName to use for this strategy\n(Warning: using the name of an existing strategy will override that strategy!):\n\n";
-                        read_token(name);
-                        if (name == "learn") {
-                            std::cout << "The name 'learn' is reserved.\n";
-                            name = "";
+                if (strategy->load_from_file(path)) {
+                    if (strategy->name.size() == 0) {
+                        while (name.length() == 0) {
+                            std::cout << "\nName to use for this strategy\n(Warning: using the name of an existing strategy will override that strategy!):\n\n";
+                            read_token(name);
+                            if (name == LEARNING_STRATEGY_NAME) {
+                                std::cout << "The name '_learn' is reserved.\n";
+                                name = "";
+                            }
                         }
+                        strategy->name = name;
                     }
-
                     ++ct;
-                    insert_strat_ptr(cs, name, single_mode);
+                    insert_strat_ptr(strategy, strategy->name, single_mode);
                 }
                 else {
                     std::cout << "Import failed. Please check if the file path is correct.\n\n";
@@ -683,7 +726,7 @@ namespace {
                 }
 
                 if (!has_buf()) {
-                    std::cout << "\nName of imported strategy to remove (enter cancel to exit):\n";
+                    std::cout << "\nName of imported strategy to remove (enter _cancel to exit):\n";
 
                     print_hline();
 
@@ -693,7 +736,7 @@ namespace {
                 }
 
                 int success = read_token(name);
-                if (name == "cancel" || interrupt || !success) break;
+                if (name == "_cancel" || interrupt || !success) break;
                 
                 auto it = extra_strats.find(name);
                 bool erase_all = (it == extra_strats.end()) && (name == "all" || name == "*");
@@ -734,7 +777,7 @@ namespace {
                     break;
                 }
                 else {
-                    std::cout << "\nStrategy does not exist or is not an imported strategy. (Enter cancel to exit)" << std::endl;;
+                    std::cout << "\nStrategy does not exist or is not an imported strategy. (Enter _cancel to exit)" << std::endl;;
                 }
 
             }
@@ -754,17 +797,17 @@ namespace {
                 int success = read_token(name);
                 if (!success || interrupt) {interrupt =  false; return;}
 
-                if (name == "learn") {
-                    std::cout << "The name 'learn' is reserved.\n";
+                if (name == LEARNING_STRATEGY_NAME) {
+                    std::cout << "The name '_learn' is reserved.\n";
                     name = "";
                 }
             }
 
-            MatrixStrategy * cs = new MatrixStrategy(s0);
+            MatrixStrategy * strategy = new MatrixStrategy(s0, name);
 
             std::cout << "Cached copy of strategy saved to: " << name << "." << std::endl;
 
-            insert_strat_ptr(cs, name, true);
+            insert_strat_ptr(strategy, name, true);
         }
 
         // logistics
@@ -865,8 +908,8 @@ namespace {
     tournament (-t): run a tournament with all the imported strategies. Use the -f switch to specify output file path: bacon -t -f output.txt\n\n\
     \
     --Learning--\n\
-    train (-l): start training against a specified strategy (improves the 'learn' strategy).\n\
-    learnfrom(-lf): sets the 'learn' strategy to a copy of the specified strategy. The 'train' command will now train this new strategy.\n\n\
+    train (-l): start training against a specified strategy (improves the '_learn' strategy).\n\
+    learnfrom(-lf): sets the '_learn' strategy to a copy of the specified strategy. The 'train' command will now train this new strategy.\n\n\
     \
     --Strategic Analysis--\n\
     winrate (-r): get the theoretical win rate of a strategy against another one.\n\
@@ -910,17 +953,17 @@ namespace {
         learning_strat->load_from_file(LEARN_PATH);
 
         // prepare and add internal strategies
-        strat["swap"] = new SwapStrategy();
-        strat["swap_visual"] = new SwapVisualiser();
-        strat["human"] = new HumanStrategy();
-        strat["random"] = new RandomStrategy();
-        strat["learn"] = learning_strat;
+        strat["_swap"] = new SwapStrategy();
+        strat["_swap_visual"] = new SwapVisualiser();
+        strat["_human"] = new HumanStrategy();
+        strat["_random"] = new RandomStrategy();
+        strat[LEARNING_STRATEGY_NAME] = learning_strat;
 
-        strat["default"] = &DEFAULT_STRATEGY;
+        strat["_default"] = &DEFAULT_STRATEGY;
 
         for (int i = 0; i <= MAX_ROLLS; ++i) {
             std::stringstream st;
-            st << "always" << i;
+            st << "_always" << i;
             strat[st.str()] = new AlwaysRollStrategy(i);
         }
 
@@ -932,12 +975,12 @@ namespace {
         load_exts(EXT_PATH);
 
         // create final strategy, if it is not in the cache/has been overridden
-        if (extra_strats.find("final") == extra_strats.end()) {
+        if (extra_strats.find("_final") == extra_strats.end()) {
             MatrixStrategy * cached_fs = create_final_strat(true);
-            strat["final"] = cached_fs;
+            strat["_final"] = cached_fs;
 
             // allow removal of final strategy
-            extra_strats.insert("final");
+            extra_strats.insert("_final");
         }
     } // init_console
 } // anonymous namespace

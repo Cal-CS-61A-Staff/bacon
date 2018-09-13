@@ -62,13 +62,13 @@
     class MatrixStrategy : public IStrategy {
     public:
         // Create an empty MatrixStrategy that rolls 0 for all scores
-        MatrixStrategy() { memset(rolls, 0, sizeof rolls); }
+        explicit MatrixStrategy(const std::string & name = "") : name(name) { memset(rolls, 0, sizeof rolls); }
 
         // Create a new MatrixStrategy by evaluating another strategy at each roll number
-        MatrixStrategy(IStrategy & strat);
+        MatrixStrategy(IStrategy & strat, const std::string & name);
 
         // Create a new MatrixStrategy from an array
-        MatrixStrategy(int ** mat);
+        MatrixStrategy(int ** mat, const std::string & name);
 
         // Set the number the strategy rolls at a set of scores
         void set_roll_num(int score0, int score1, int roll); 
@@ -86,6 +86,7 @@
             return rolls[score0][score1];
         }
 
+        std::string name;
     private:
         int rolls[GOAL][GOAL];
     };

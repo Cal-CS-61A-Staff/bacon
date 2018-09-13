@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 from __future__ import print_function
-import os, sys, imp
+import os, sys, imp, random, string, re
 
 GOAL = 100 # goal score for Hog
 
@@ -75,8 +75,15 @@ def convert(file):
         output_name = DEF_LONG_TEAM_NAME
     
     # check for duplicate team names
+    strat_name = output_name
+    try:
+        output_name = output_name.encode('ascii','ignore').decode('ascii')
+        output_name = re.sub(r"[\\/:*?""<>|\r\n]", "", output_name)
+    except:
+        output_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
     if output_name in output_names:
-        full_output_name = output_name + "__" + str(output_names[output_name]) + '.strat'
+        full_output_name = output_name + "_" + str(output_names[output_name]) + '.strat'
+        strat_name += "_" + str(output_names[output_name]) 
         output_names[output_name] += 1
         eprint("WARNING: found multiple teams with name", output_name + ". Writing to output file",
                full_output_name, "instead to disambiguate...")
@@ -92,12 +99,13 @@ def convert(file):
         except:
             pass
     
-    out = open(os.path.join(out_dir, full_output_name), 'w')
+    out = open(os.path.join(out_dir, full_output_name), 'w', encoding='utf-8')
     
     # write out new strategy
     
     try:
         skip_rest = False
+        out.write('strategy ' + strat_name + '\n')
         
         for i in range(GOAL):
             for j in range(GOAL):
@@ -132,7 +140,7 @@ def convert(file):
     out.flush()
     out.close()
     
-    print (">> converted: " + output_name + " (" + file + ")")
+    print (">> converted: " + strat_name + " (" + file + ")")
     
     del module
     return 1 # useful for counting how many converted

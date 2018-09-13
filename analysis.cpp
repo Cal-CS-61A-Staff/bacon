@@ -39,7 +39,7 @@ namespace {
 
 void LearningStrategy::learn(IStrategy & oppo_strat, int number,
     std::pair<int, int>focus, volatile int * interrupt, bool quiet, int announce_interval, int wr_interval) {
-        MatrixStrategy testStrat = MatrixStrategy(*this);
+        MatrixStrategy testStrat = MatrixStrategy(*this, "_learn");
 
         if (!quiet) {
             std::cout << "Learning procedure started.\n" << "Initial win rate: ";
@@ -393,7 +393,7 @@ MatrixStrategy * create_final_strat(bool quiet) {
         std::cout << "Preparing 2/2...\n\nComputing strategy..." << std::endl;
 
     // make a CachedStrategy in the heap to store our strategy matrix. We will return this at the end.
-    MatrixStrategy * opt_strat = new MatrixStrategy();
+    MatrixStrategy * opt_strat = new MatrixStrategy("_final");
 
     for (int i = 0; i < GOAL; ++i) {
         for (int j = 0; j < GOAL; ++j) {

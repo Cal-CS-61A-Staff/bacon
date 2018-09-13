@@ -71,9 +71,12 @@ execute(PY_EXE + ' ' + HOGCONV_PATH + ' -o "' + STRAT_DIR + '" ' + ' '.join(subm
 for root, subdirs, files in os.walk(STRAT_DIR):
     for file in files:
         strat_paths.append('"' + join(root, file) + '"')
-        
-execute(BACON_PATH + ' -rm all', True)
-execute(BACON_PATH + ' -i -f ' + ' '.join(strat_paths))
-execute(BACON_PATH + ' -t ' + str(N_THREADS) + ' -f ' + OUTPUT_PATH)
 
-print ("contest.py: All Done. Results saved to: " + OUTPUT_PATH)
+if strat_paths:        
+    execute(BACON_PATH + ' -rm all', True)
+    execute(BACON_PATH + ' -i -f ' + ' '.join(strat_paths))
+    execute(BACON_PATH + ' -t ' + str(N_THREADS) + ' -f ' + OUTPUT_PATH)
+
+    print ("contest.py: All Done. Results saved to: " + OUTPUT_PATH)
+else:
+    print ("contest.py: No strategies converted! Exiting...")

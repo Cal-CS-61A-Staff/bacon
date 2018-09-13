@@ -45,7 +45,7 @@ int HumanStrategy::operator() (int _, int __) {
 
 // MatrixStrategy
 
-MatrixStrategy::MatrixStrategy(IStrategy & strat) {
+MatrixStrategy::MatrixStrategy(IStrategy & strat, const std::string & name) : name(name) {
     for (int i = 0; i < GOAL; ++i) {
         for (int j = 0; j < GOAL; ++j) {
             rolls[i][j] = strat(i, j);
@@ -53,7 +53,7 @@ MatrixStrategy::MatrixStrategy(IStrategy & strat) {
     }
 }
 
-MatrixStrategy::MatrixStrategy(int ** mat) {
+MatrixStrategy::MatrixStrategy(int ** mat, const std::string & name) : name(name) {
     for (int i = 0; i < GOAL; ++i) {
         for (int j = 0; j < GOAL; ++j) {
             rolls[i][j] = mat[i][j];
@@ -73,6 +73,15 @@ bool MatrixStrategy::load_from_file(std::string path) {
     std::ifstream ifs(path);
     if (!ifs) return false;
 
+    std::string header;
+    ifs >> header;
+    if (header != "strategy") return false; // wrong format
+    std::getline(ifs, name);
+
+    auto wsfront = std::find_if_not(name.begin(), name.end(),[](int c){return std::isspace(c);});
+    auto wsback = std::find_if_not(name.rbegin(), name.rend(),[](int c){return std::isspace(c);}).base();
+    name = (wsback <= wsfront ? std::string() : std::string(wsfront,wsback));
+
     for (int i = 0; i < GOAL; ++i) {
         for (int j = 0; j < GOAL; ++j) {
             int tmp; ifs >> tmp;
@@ -88,6 +97,7 @@ void MatrixStrategy::write_to_file(std::string path, bool pyformat) {
     std::ofstream ofs(path);
 
     if (pyformat) ofs << "def strategy(score0, score1):\n  return [[";
+    else ofs << "strategy " << name << "\n";
 
     for (int i = 0; i < GOAL; ++i) {
         if (pyformat && i) ofs << "],[";

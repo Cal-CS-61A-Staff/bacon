@@ -19,4 +19,7 @@
     // Modulo for Time Trot
     const int MOD_TROT = 5; 
 
+    // learning strategy name
+    const std::string LEARNING_STRATEGY_NAME = "_learn";
+
 #endif // !PARAMS_H

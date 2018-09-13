@@ -31,7 +31,7 @@ namespace {
     inline void add_swap_scores(int & score0, int & score1, int add0 = 0) {
         score0 += add0;
         if (!enable_swine_swap) return;
-        if (score0 > 1 && score1 > 1 && (score0 % score1 == 0 || score1 % score0 == 0)) std::swap(score0, score1);
+        if (is_swap(score0, score1)) std::swap(score0, score1);
     }
 }
 

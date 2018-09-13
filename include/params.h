@@ -17,6 +17,6 @@
     const int MAX_TURNS = GOAL * 2;
 
     // Modulo for Time Trot
-    const int MOD_TROT = 8; 
+    const int MOD_TROT = 5; 
 
 #endif // !PARAMS_H

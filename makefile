@@ -26,7 +26,7 @@ $(OUTPUTNAME) : $(OBJ)
 clean:
 	rm -rf $(ODIR)/*
 	rm -rf .vs
-	rm -f bin/*.pdb
+	rm -f bin/*.pdb 
 	rm -f bin/*.iobj
 	rm -f bin/*.ipdb
 	rm -f bin/*.ilk

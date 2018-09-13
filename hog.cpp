@@ -31,14 +31,17 @@ int roll_dice(int num_rolls, IDice& dice) {
 }
 
 int free_bacon(int score) {
+    return std::max(2 * (score / 10) - score % 10, 1);
+    /*
+    // SP18 rules
     int max_digit = 0;
 
     while (score > 0) {
         max_digit = std::max(score % 10, max_digit);
         score /= 10;
     }
-
     return max_digit + 1;
+    */
 }
 
 int take_turn(int num_rolls, int score1, IDice& dice){
@@ -55,14 +58,18 @@ int take_turn(int num_rolls, int score1, IDice& dice){
 }
 
 int is_swap(int score0, int score1) {
+    return abs(score0 / 10 - score0 % 10) == abs(score1 / 10 - score1 % 10);
+    /*
+    // SP18 rules
     if (!enable_swine_swap) return false;
     if (score0 <= 1 || score1 <= 1) return false;
     return score0 % score1 == 0 || score1 % score0 == 0;
+    */
 }
 
 int is_time_trot(int turn_num, int rolls) {
     if (!enable_time_trot) return false;
-    return turn_num % 8 == rolls;
+    return turn_num % MOD_TROT == rolls;
 }
 
 std::pair<int, int> play(IStrategy& strategy0, IStrategy& strategy1, int score0, int score1, 

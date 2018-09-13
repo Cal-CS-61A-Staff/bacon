@@ -5,7 +5,7 @@ import os, sys, imp
 GOAL = 100 # goal score for Hog
 
 STRATEGY_FUNC_ATTR = 'final_strategy' # attribute of student's module that contains the strategy function
-TEAM_NAME_ATTR = 'TEAM_NAME' # attribute of student's module that contains the team name
+TEAM_NAME_ATTRS = ['PLAYER_NAME', 'TEAM_NAME'] # allowed attributes of student's module that contains the team name
 
 TEAM_NAME_MAX_LEN = 100 # max length for team names (set to 0 to remove limit)
 DEF_EMPTY_TEAM_NAME = "(empty string)" # name for teams with an empty team name
@@ -18,6 +18,8 @@ count, out_dir, out_sw = 0, '', False
 
 # dict of names, used to check for duplicate team names
 output_names = {}
+
+empty_name_teams = []
 
 # print to stderr
 def eprint(*args, **kwargs):
@@ -32,8 +34,9 @@ def convert(file):
     
     # make sure module's dependencies work
     sys.path[-1] = module_dir
+    sys.path.append(os.path.dirname(os.path.realpath(__file__)))
     
-    # import module 
+    # import module
     try:
         module = imp.load_source(module_name, file)
     except Exception as e:
@@ -41,26 +44,30 @@ def convert(file):
         eprint ("\nERROR: error occurred while loading " + file + ":")
         eprint (type(e).__name__ + ': ' + str(e))
         eprint ("skipping...\n")
-        
         return 0
     
-    try:
+    if hasattr(module, STRATEGY_FUNC_ATTR):
         strat = getattr(module, STRATEGY_FUNC_ATTR)
-    except:
+    else:
         eprint ("ERROR: " + file + " has no attribute " + STRATEGY_FUNC_ATTR + " , skipping...")
+        del module
         return 0
     
-    try:
-        output_name = getattr(module, TEAM_NAME_ATTR)
-    except:
-        eprint ("WARNING: " + file + " does not specify " + TEAM_NAME_ATTR + ". Using module name as team name...")
-        output_name = module_name
-    
-    # check for empty team names
+    output_name = ""
+    for attr in TEAM_NAME_ATTRS:
+        if hasattr(module, attr):
+            val = getattr(module, attr)
+            if val:
+                output_name = getattr(module, attr)
+            setattr(module, attr, "")
+            
     if not output_name:
-        eprint ("WARNING: " + file + " has an empty team name. Setting team name to " + DEF_EMPTY_TEAM_NAME + "...")
-        output_name = DEF_EMPTY_TEAM_NAME
-        
+        eprint ("WARNING: submission " + file + " has no team name. Using directory name...")
+        module_dir_name = os.path.split(module_dir)[1]
+        if not module_dir_name: module_dir_name = module_name
+        output_name = module_dir_name
+        empty_name_teams.append(module_dir_name)
+    
     # check for team names that are too long
     if len(output_name) > TEAM_NAME_MAX_LEN and TEAM_NAME_MAX_LEN > 0:
         eprint ("WARNING: " + file + " has a team name longer than " + TEAM_NAME_MAX_LEN + 
@@ -119,15 +126,16 @@ def convert(file):
         eprint ("\nERROR: error occurred while running " + STRATEGY_FUNC_ATTR + ' in ' + file + ":") 
         eprint (type(e).__name__ + ': ' + str(e))
         eprint ("skipping...\n")
-        
+        del module
         return 0
     
     out.flush()
     out.close()
     
-    print ("converted: " + file)
+    print (">> converted: " + output_name + " (" + file + ")")
     
-    return 1 # useful for counting
+    del module
+    return 1 # useful for counting how many converted
     
 
 def convert_dir(dir = os.path.dirname(__file__)):
@@ -177,3 +185,6 @@ else:
     print ("in powershell: 'bacon -i -f (ls " + (out_dir + "\\" if out_dir else "") + "*.strat | % FullName)'\n")
     print ("after strategies have been imported, run 'bacon -t [num_threads] [-f output_path]' to run tournament.")
     print ("to clear all imported strategies, use 'bacon -rm all'.")
+
+if empty_name_teams:
+    print("WARNING: some teams " + str(empty_name_teams) + " did not specify team names in their submissions!")

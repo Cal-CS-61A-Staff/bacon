@@ -195,6 +195,7 @@ namespace {
             }
             
             success = read_token(name);
+            if (!interactive_mode) break;
             
         } while ((no_human && name == "human") || strat.find(name) == strat.end());
 
@@ -378,8 +379,13 @@ namespace {
 
             std::cout << "Running tournament..." << std::endl;
 
-            std::vector<std::pair<int, std::string> *> results = 
-                round_robin(contestants, announcer, 100, 0.500001, thds, &interrupt);
+            std::vector<std::pair<int, std::string>> results;
+            double ** win_rate_mat = new double*[contestants.size()];
+            for (size_t i = 0; i < contestants.size(); ++i) {
+                win_rate_mat[i] = new double[contestants.size()];
+            }
+
+            round_robin(contestants, results, announcer, 100, 0.500001, thds, win_rate_mat, &interrupt);
 
             if (interrupt) 
                 std::cout << "\nTournament interrupted by user. Incomplete results:\n\n";
@@ -389,7 +395,6 @@ namespace {
 
             int rank = 1, ties = 0;
 
-            
             std::ofstream save_ofs;
 
             if (!interrupt) {
@@ -402,29 +407,47 @@ namespace {
                 }
             }
 
+            std::map<std::string, int> name_to_rank;
+            std::vector<int> rank_to_index(contestants.size());
             for (unsigned i = 0; i < results.size(); ++i) {
-                if (i && results[i]->first < results[i - 1]->first) {
+                if (i && results[i].first < results[i - 1].first) {
                     rank += ties;
                     ties = 1;
                 }
                 else {
                     ++ties;
                 }
-
-                std::cout << rank << ". " << results[i]->second << " with " << results[i]->first << " wins \n";
-
+                name_to_rank[results[i].second] = i;
+                std::cout << rank << ". " << results[i].second << " with " << results[i].first << " wins \n";
                 if (!interrupt) 
-                    save_ofs << rank <<  ". " << results[i]->second << " with " << results[i]->first << " wins \n";
+                    save_ofs << rank <<  ". " << results[i].second << " with " << results[i].first << " wins \n";
             }
-
-            for (unsigned i = 0; i < results.size(); ++i) {
-                delete results[i];
+            for (size_t i = 0; i < contestants.size(); ++i) {
+                rank_to_index[name_to_rank[contestants[i].first]] = i;
+            }
+            if (!interrupt) {
+                save_ofs << "\nWin rates:\n";
+                for (size_t i = 0; i < contestants.size(); ++i) {
+                    for (size_t j = 0; j < contestants.size(); ++j) {
+                        if (j) save_ofs << ", ";
+                        int ir = rank_to_index[i], jr = rank_to_index[j];
+                        if (ir == jr) win_rate_mat[ir][jr] = 0.5;
+                        save_ofs << win_rate_mat[ir][jr];
+                    }
+                    save_ofs << "\n";
+                }
             }
 
             if (interrupt) 
                 std::cout << "\n(Results are incomplete and so haven't been written to file)\n" << std::endl;
             else
                 std::cout << "\nResults have been written to '" << path << "'.\n" << std::endl;
+
+            for (size_t i = 0; i < contestants.size(); ++i) {
+                delete[] win_rate_mat[i];
+            }
+            delete[] win_rate_mat;
+
         }
 
         // learning

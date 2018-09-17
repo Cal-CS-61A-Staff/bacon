@@ -636,16 +636,10 @@ double average_win_rate_by_sampling(IStrategy & strategy0, IStrategy & strategy1
 // hide from linkage
 namespace {
     // sorts by wins in descending order, then sorts by names alphabetically
-    bool wins_comparer(std::pair<int, std::string> * a, std::pair<int, std::string> * b) {
-        if (a->first > b->first) 
-            return true;
-
-        else if (a->first < b->first) 
-            return false;
-
-        else {
-            return a->second < b->second;
-        }
+    bool wins_comparer(const std::pair<int, std::string> & a, const std::pair<int, std::string> & b) {
+        if (a.first > b.first) return true;
+        else if (a.first < b.first) return false;
+        else return a.second < b.second;
     }
 
     // multithreading stuff
@@ -654,13 +648,14 @@ namespace {
     bool announcer_lock = false;
 
     // coroutine for the round-robin tournament procedure
-    void round_robin_coroutine(std::vector<std::pair<std::string, IStrategy *> > strats,
+    void round_robin_coroutine(std::vector<std::pair<std::string, IStrategy *> > * strats,
         void announcer(int games_played, int games_remaining, int high, std::string high_strat),
-        int announcer_interval, double margin, volatile int * interrupt, 
-            int * high, int * high_strat, std::vector<std::pair<int,std::string> *> victories, int * games_played,
+        int announcer_interval, double margin, double ** win_rate_mat,
+        volatile int * interrupt, 
+            int * high, int * high_strat, std::vector<std::pair<int,std::string>> * victories, int * games_played,
             int jbase, int jdelta) {
 
-        unsigned N = (unsigned)strats.size();
+        size_t N = strats->size();
 
         int total_games = N * (N - 1) / 2;
 
@@ -671,10 +666,16 @@ namespace {
             for (unsigned j = i + 1 + jbase; j < N; j += jdelta){
                 if (interrupt && *interrupt) break;
 
-                std::string name0 = strats[i].first, name1 = strats[j].first;
-                IStrategy * strat0 = strats[i].second, * strat1 = strats[j].second;
+                std::string name0 = strats->at(i).first, name1 = strats->at(j).first;
+                IStrategy * strat0 = strats->at(i).second, * strat1 = strats->at(j).second;
 
                 double avr = average_win_rate(*strat0, *strat1, -1, 0, 0, 0, jbase);
+
+                if (win_rate_mat) {
+                    win_rate_mat[i][j] = avr;
+                    win_rate_mat[j][i] = 1.0 - avr;
+                }
+
                 int winner = -1;
 
                 if (avr > margin)
@@ -683,9 +684,9 @@ namespace {
                     winner = j;
 
                 if (winner != -1) {
-                    ++victories[winner]->first;
-                    if (victories[winner]->first > (*high)) {
-                        (*high) = victories[winner]->first;
+                    ++victories->at(winner).first;
+                    if (victories->at(winner).first > (*high)) {
+                        (*high) = victories->at(winner).first;
                         (*high_strat) = winner;
                     }
                 }
@@ -698,7 +699,7 @@ namespace {
 
                     announcer_lock = true;
 
-                    announcer(*games_played, total_games - *games_played, *high, strats[* high_strat].first);
+                    announcer(*games_played, total_games - *games_played, *high, strats->at(* high_strat).first);
 
                     announcer_lock = false;
                     announcer_cv.notify_all();
@@ -709,9 +710,13 @@ namespace {
 }
 
 // Run a round-robin tournament on [thread] threads
-std::vector<std::pair<int, std::string> *> round_robin(std::vector<std::pair<std::string, IStrategy *> > strats,
+void round_robin(std::vector<std::pair<std::string, IStrategy *> > & strats,
+    std::vector<std::pair<int, std::string>> & victories,
     void announcer(int games_played, int games_remaining, int high, std::string high_strat),
-    int announcer_interval, double margin, int threads, volatile int * interrupt){
+    int announcer_interval, 
+    double margin, int threads,
+    double ** win_rate_mat,
+    volatile int * interrupt) {
 
     // Compute permutations beforehand to prevent conflict between threads
     if (!perms_computed) compute_perms();
@@ -719,28 +724,22 @@ std::vector<std::pair<int, std::string> *> round_robin(std::vector<std::pair<std
     size_t N = strats.size();
     int high = 0, high_strat = 0;
 
-    std::vector<std::pair<int, std::string> *> victories(N);
+    victories.reserve(N);
+    for (size_t i = 0; i < N; ++i) victories.emplace_back(0, strats[i].first);
 
-    for (unsigned i = 0; i < N; ++i) {
-        victories[i] = new std::pair<int, std::string>(0, strats[i].first);
-    }
-
-    int total_games = (int)N * ((int)N - 1) / 2;
-    int games_played = 0;
+    int total_games = (int)N * ((int)N - 1) / 2, games_played = 0;
 
     std::vector<std::thread *> threadmgr;
     threadmgr.reserve(threads);
 
     dp.resize(threads);
-
     announcer_lock = false;
 
     for (int i = 0; i < threads; ++i) {
         std::thread * th = new std::thread(round_robin_coroutine,
-            strats, announcer, announcer_interval,
-            margin, interrupt,
-            &high, &high_strat, victories, &games_played, i, threads);
-
+            &strats, announcer, announcer_interval,
+            margin, win_rate_mat, interrupt,
+            &high, &high_strat, &victories, &games_played, i, threads);
         threadmgr.push_back(th);
     }
 
@@ -753,10 +752,7 @@ std::vector<std::pair<int, std::string> *> round_robin(std::vector<std::pair<std
     }
 
     dp.resize(1);
-
     std::sort(victories.begin(), victories.end(), wins_comparer);
-
-    return victories;
 }
 
 // *** Graphing ***

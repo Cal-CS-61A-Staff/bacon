@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Hog Contest Leaderboard - CS 61A</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="UTF-8">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inconsolata|Roboto:300,400,500">
+        <style>
+            html, * { 
+                box-sizing: border-box;
+                font-family: 'Inconsolata', monospace;
+            }
+            body {
+                padding: 0;
+                background-color: #333;
+                color: #fff
+            }
+            h1, h1>span, h2, h3, h4, h5, h6 {
+                font-family: 'Roboto', sans-serif;
+                padding-left: 0;
+                margin: 0;
+                font-weight: 300;
+            }
+            span.emphasis {
+                font-weight: 400;
+            }
+            ol {
+                list-style-type: none;
+                margin: 25px 0;
+                padding: 0;
+                background-color: #444
+            }
+            ol > li {
+                padding: 5px 10px;
+            }
+            ol > li:hover {
+                background-color: #4f4f4f
+            }
+            
+            li.rank-0 {
+                background-color: #ddaa11;
+                color: #fff
+            }
+            li.rank-0:hover {
+                background-color: #ecb722;
+            }
+            
+            li.rank-1 {
+                background-color: #555555;
+                color: #fff
+            }
+            li.rank-1:hover {
+                background-color: #666666;
+                color: #fff
+            }
+            
+            li.rank-2 {
+                background-color: #aa7711;
+                color: #fff
+            }
+            li.rank-2:hover {
+                background-color: #bb8833;
+                color: #fff
+            }
+            
+            li.rank-staff {
+                color: #bbb
+            }
+
+            li.winrate-self {
+                color: #bbb;
+            }
+            
+            a {
+                text-decoration: none;
+                color: #fc3
+            }
+            
+            a:hover {
+                text-decoration: none;
+                color: #fc9
+            }
+            
+            #leaderboard {
+                padding: 3% 6%
+            }
+            #timestamp, #leaderboard-click-tip{
+                font-size: 12px;
+                margin-bottom: 0;
+            }
+            #timestamp { margin-top: 20px }
+            #winrate{
+                position:absolute;
+                top:0px; left:0px;
+                background-color: #222;
+                padding: 3% 6%;
+                width:100%;
+                display:none;
+            }
+            #winrate-ctrl-bar{
+                text-align:right;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="leaderboard">
+            <h2>CS 61A</h2>
+            <h1><span class="emphasis">Hog Contest</span> Leaderboard</h1>
+            <p id="timestamp">
+            As of 
+            {%TIMESTAMP%}
+            </p>
+            <p id="leaderboard-click-tip"><strong>New Feature:</strong> Click any team to see win rates</p>
+            <ol>
+            {%RANKINGS%}
+            </ol>
+            <a href="https://cs61a.org/proj/hog_contest/">hog contest specs</a>            
+        </div>
+        
+        <div id="winrate">
+            <div id="winrate-ctrl-bar">
+                <a href="#" id="winrate-close">close</a>
+            </div>
+            <h3>Win Rates For Team:</h3>
+            <h1 id="winrate-team-name">Doriath</h1>
+            <ol id="winrate-table">
+                <li>10</li>
+            </ol>
+        </div>
+        
+        <script>
+            (function() {
+                var winrate = document.getElementById("winrate");
+                var winrate_team_name = document.getElementById("winrate-team-name");
+                var winrate_table = document.getElementById("winrate-table");
+                var closebtn = document.getElementById("winrate-close");
+                var winrate_mat = {%WINRATE_MATRIX%}
+                var teams = {%TEAMS%}
+                
+                var onClickRank = function(e) {
+                    winrate.style.display = "block";
+                    var nd = e.target;
+                    //if (nd.id) nd = e.parentNode;
+                    if (nd.tagName.toLocaleLowerCase() != "li") {
+                        nd = nd.parentNode;
+                    }
+                    name = nd.id;
+                    name = name.substr(name.indexOf('-')+1);
+                    tid = parseInt(name)
+                    winrate_team_name.innerHTML = teams[tid];
+                    table = "";
+                    for (var i = 0; i < teams.length; i++) {
+                        table += (i == tid ? "<li class=\"winrate-self\">" : "<li>") + winrate_mat[tid][i].toFixed(6) + " vs <strong>" + teams[i] + "</strong></li>"
+                    }
+                    winrate_table.innerHTML = table;
+                    window.scrollTo(0, 0);
+                }
+
+                var onClickClose = function(e) {
+                    winrate.style.display = "none";
+                }
+
+                var ranki = document.getElementsByClassName("rank")
+                for (var i = 0; i < ranki.length; i++) {
+                    ranki[i].addEventListener("click", onClickRank);
+                }
+                closebtn.addEventListener("click", onClickClose);
+            })();
+        </script>
+    </body>
+</html>

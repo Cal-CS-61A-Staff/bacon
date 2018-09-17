@@ -76,10 +76,13 @@
     /* Run a round-robin tournament. Returns a vector of pairs where
        the first element of each item is the number of wins,
        and the second is the name of the player */
-    std::vector<std::pair<int, std::string> *> round_robin(std::vector<std::pair<std::string, IStrategy *>> strats,
+    void round_robin(std::vector<std::pair<std::string, IStrategy *>> & strats,
+        std::vector<std::pair<int, std::string>> & victories,
         void announcer(int games_played, int games_remaining, int high, std::string high_strat) = NULL,
         int announcer_interval = 100,
-        double margin = 0.500001, int threads = 4, volatile int * interrupt = NULL);
+        double margin = 0.500001, int threads = 4,
+        double ** win_rate_mat = NULL,
+        volatile int * interrupt = NULL);
 
     // Compute the "final" strategy using DP
     MatrixStrategy * create_final_strat(bool quiet=false);

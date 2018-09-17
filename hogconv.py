@@ -1,6 +1,7 @@
-#!/usr/bin/python3
+#!/bin/python3
 from __future__ import print_function
-import os, sys, imp, random, string, re
+from functools import wraps
+import os, sys, imp, random, string, re, errno, threading, time, queue
 
 GOAL = 100 # goal score for Hog
 
@@ -8,11 +9,12 @@ STRATEGY_FUNC_ATTR = 'final_strategy' # attribute of student's module that conta
 TEAM_NAME_ATTRS = ['PLAYER_NAME', 'TEAM_NAME'] # allowed attributes of student's module that contains the team name
 
 TEAM_NAME_MAX_LEN = 100 # max length for team names (set to 0 to remove limit)
-DEF_EMPTY_TEAM_NAME = "(empty string)" # name for teams with an empty team name
-DEF_LONG_TEAM_NAME = "(team name longer than 50 chars)" # name for teams with team names that are too long
+DEF_EMPTY_TEAM_NAME = "<no name given, email starts with {}>" # name for teams with an empty team name
 
 MIN_ROLLS, MAX_ROLLS = 0, 10 # min, max roll numbers
-ERROR_DEFAULT_ROLL = 4 # default roll in case of invalid strategy function (will report error)
+ERROR_DEFAULT_ROLL = 5 # default roll in case of invalid strategy function (will report error)
+
+TIMEOUT_SECONDS = 45 # max time a student's submission should run
 
 count, out_dir, out_sw = 0, '', False
 
@@ -25,9 +27,58 @@ empty_name_teams = []
 def eprint(*args, **kwargs):
     """ print to stderr """
     print(*args, file=sys.stderr, **kwargs)
-	
+
+class Worker(threading.Thread):
+    def __init__ (self, func, args, kwargs, q):
+        threading.Thread.__init__ (self)
+        self.func = func
+        self.args = args
+        self.kwargs = kwargs
+        self.q = q
+        self.setDaemon (True)
+    def run (self):
+        self.q.put((True, self.func(*self.args, **self.kwargs)))
+    
+class Timer(threading.Thread):
+    def __init__ (self, timeout, error_message, worker, q):
+        threading.Thread.__init__ (self)
+        self.timeout = timeout
+        self.error_message = error_message
+        self.worker = worker
+        self.q = q
+        self.setDaemon (True)
+    def run (self):
+        time.sleep(self.timeout)
+        self.q.put((False, None))
+       
+def timeout(seconds=10, error_message=os.strerror(errno.ETIME)):
+    """ makes function error if ran for too long """
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            q = queue.Queue()
+            worker = Worker(func, args, kwargs, q)
+            timer = Timer(seconds, error_message, worker, q)
+            worker.start()
+            timer.start()
+            code, result = q.get()
+            if worker.isAlive():
+                del worker
+            if timer.isAlive():
+                del timer
+            if code:
+                return result
+            else:
+                print("ERROR: Conversion timed out (> {} s) for: ".format(TIMEOUT_SECONDS) + args[0])
+
+        return wraps(func)(wrapper)
+
+    return decorator
+
+@timeout(TIMEOUT_SECONDS)
 def convert(file):  
     """ convert a single file """
+    import shutil, os, sys
+    sys.setrecursionlimit(200000)
     module_path = file[:-3] # cut off .py
     
     module_dir, module_name = os.path.split(module_path)
@@ -39,40 +90,48 @@ def convert(file):
     # import module
     try:
         module = imp.load_source(module_name, file)
+        # try to prevent use of dangerous libraries, although not going to be possible really
+        module.subprocess = module.shutil = "trolled"
+        if hasattr(module, "os"):
+            module.os.rmdir = module.os.remove = "trolled"
+        
     except Exception as e:
         # report errors while importing
         eprint ("\nERROR: error occurred while loading " + file + ":")
         eprint (type(e).__name__ + ': ' + str(e))
         eprint ("skipping...\n")
-        return 0
-    
+        return
     if hasattr(module, STRATEGY_FUNC_ATTR):
         strat = getattr(module, STRATEGY_FUNC_ATTR)
     else:
         eprint ("ERROR: " + file + " has no attribute " + STRATEGY_FUNC_ATTR + " , skipping...")
         del module
-        return 0
+        return
     
     output_name = ""
     for attr in TEAM_NAME_ATTRS:
         if hasattr(module, attr):
-            val = getattr(module, attr)
+            val = str(getattr(module, attr))
             if val:
                 output_name = getattr(module, attr)
             setattr(module, attr, "")
             
     if not output_name:
-        eprint ("WARNING: submission " + file + " has no team name. Using directory name...")
-        module_dir_name = os.path.split(module_dir)[1]
+        eprint ("WARNING: submission " + file + " has no team name. Using default name...")
+        module_dir_name = ""
+        if '/' in module_dir:
+            module_dir_name = module_dir[module_dir.index('/')+1:]
+        elif '\\' in module_dir:
+            module_dir_name = module_dir[module_dir.index('\\')+1:]
         if not module_dir_name: module_dir_name = module_name
-        output_name = module_dir_name
+        output_name = DEF_EMPTY_TEAM_NAME.format(module_dir_name[0])
         empty_name_teams.append(module_dir_name)
     
     # check for team names that are too long
     if len(output_name) > TEAM_NAME_MAX_LEN and TEAM_NAME_MAX_LEN > 0:
-        eprint ("WARNING: " + file + " has a team name longer than " + TEAM_NAME_MAX_LEN + 
-               " chars. Setting team name to " + DEF_LONG_TEAM_NAME + "...")
-        output_name = DEF_LONG_TEAM_NAME
+        eprint ("WARNING: " + file + " has a team name longer than " + str(TEAM_NAME_MAX_LEN) + 
+               " chars. Truncating...")
+        output_name = output_name[:TEAM_NAME_MAX_LEN-3] + "..."
     
     # check for duplicate team names
     strat_name = output_name
@@ -103,39 +162,38 @@ def convert(file):
     
     # write out new strategy
     
-    try:
-        skip_rest = False
-        out.write('strategy ' + strat_name + '\n')
-        
-        for i in range(GOAL):
-            for j in range(GOAL):
-                if j: out.write(' ')
-                
-                if not skip_rest:
-                    rolls = strat(i, j)
-                
-                    # check if output valid
-                    if type(rolls) != int or rolls < MIN_ROLLS or rolls > MAX_ROLLS:
-                        if type(rolls) != int:
-                            eprint("WARNING: team", output_name + "'s strategy function outputted something other than a number!")
-                        elif type(rolls) != int:
-                            eprint("WARNING: team", output_name + "'s strategy function outputted an invalid number of rolls:", rolls + "!")
-                            
-                        eprint("Due to invalid strategy function, all rolls for team", output_name , "will default to 4. Please notify the students!")
-                        
-                        rolls = ERROR_DEFAULT_ROLL
-                        skip_rest = True
-                
-                out.write(str(rolls))
-            out.write('\n')
+    out.write('strategy ' + strat_name + '\n')
+    nerror = 0
+    errname = ""
+    
+    for i in range(GOAL):
+        for j in range(GOAL):
+            if j: out.write(' ')
+            try:
+                rolls = strat(i, j)
             
-    except Exception as e:
-        # report errors while running strategy
-        eprint ("\nERROR: error occurred while running " + STRATEGY_FUNC_ATTR + ' in ' + file + ":") 
-        eprint (type(e).__name__ + ': ' + str(e))
-        eprint ("skipping...\n")
-        del module
-        return 0
+                # check if output valid
+                if type(rolls) != int or rolls < MIN_ROLLS or rolls > MAX_ROLLS:
+                    if type(rolls) != int:
+                        eprint("WARNING: team", output_name + "'s strategy function outputted something other than a number!")
+                    else:
+                        eprint("WARNING: team", output_name + "'s strategy function outputted an invalid number of rolls:", rolls + "!")
+                        
+                    eprint("Due to invalid strategy function, all rolls for team", output_name , "will default to 4. Please notify the students!")
+                    
+                    rolls = ERROR_DEFAULT_ROLL
+            
+                out.write(str(rolls))
+            except Exception as e:
+                # report errors while running strategy
+                nerror += 1
+                errname = type(e).__name__ + " " + str(e)
+                out.write(str(ERROR_DEFAULT_ROLL))
+        out.write('\n')
+        
+    if nerror:
+        eprint ("\nERROR: " + str(nerror) + " error(s) occurred while running " + STRATEGY_FUNC_ATTR + ' for ' + output_name + '(' + file + "):") 
+        eprint (errname)
     
     out.flush()
     out.close()
@@ -143,18 +201,18 @@ def convert(file):
     print (">> converted: " + strat_name + " (" + file + ")")
     
     del module
-    return 1 # useful for counting how many converted
+    global count
+    count += 1 # counting how many converted
     
 
 def convert_dir(dir = os.path.dirname(__file__)):
     """ convert all files in a directory (does not recurse) """
-    count = 0   
-    
     for file in os.listdir(dir or None):
-        if file == '__init__.py' or file == __file__ or file[-3:] != '.py': continue
-        count += convert(file, count)
-    
-    return count
+        path = os.path.join(dir, file)
+        if os.path.isdir(path):
+            convert_dir(path)
+        elif file == '__init__.py' or file == __file__ or file[-3:] != '.py': continue
+        else: convert(path)
         
 # add an empty entry to sys.path so that we can add dependencies for each student module
 sys.path.append('')
@@ -175,10 +233,10 @@ for i in range(1, len(sys.argv)):
     
     if os.path.exists(path):
         if os.path.isdir(path):
-            count += convert_dir(path)
+            convert_dir(path)
         else:
-            count += convert(path)
-            
+            convert(path)
+                
     else:
         eprint ("ERROR: can't access " + path + ", skipping...")  
     

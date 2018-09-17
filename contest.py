@@ -7,6 +7,8 @@ FILE_NAME = 'hog_contest.py'
 OUTPUT_PATH = 'results.txt'
 N_THREADS = 4
 
+STAFF_SOLN_PATH = ""#"staff_soln_dp.strat"
+
 PY_EXE = sys.executable
 PROJ_DIR = os.path.dirname(os.path.abspath(__file__))
 STRAT_DIR = join(PROJ_DIR, 'strat')
@@ -71,6 +73,9 @@ execute(PY_EXE + ' ' + HOGCONV_PATH + ' -o "' + STRAT_DIR + '" ' + ' '.join(subm
 for root, subdirs, files in os.walk(STRAT_DIR):
     for file in files:
         strat_paths.append('"' + join(root, file) + '"')
+        
+if STAFF_SOLN_PATH:
+    strat_paths.append('"' + STAFF_SOLN_PATH + '"')
 
 if strat_paths:        
     execute(BACON_PATH + ' -rm all', True)

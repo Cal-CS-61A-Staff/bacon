@@ -134,10 +134,10 @@ def convert(file):
         output_name = output_name[:TEAM_NAME_MAX_LEN-3] + "..."
     
     # check for duplicate team names
-    strat_name = output_name
+    strat_name = re.sub(r"[\r\n]", "", output_name)
     try:
         output_name = output_name.encode('ascii','ignore').decode('ascii')
-        output_name = re.sub(r"[\\/:*?""<>|\r\n]", "", output_name)
+        output_name = re.sub(r"[\\/:*?""<>|+=,\r\n]", "", output_name)
     except:
         output_name = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(12))
     if output_name in output_names:
@@ -158,6 +158,7 @@ def convert(file):
         except:
             pass
     
+    full_output_name = full_output_name.replace('\"', '')
     out = open(os.path.join(out_dir, full_output_name), 'w', encoding='utf-8')
     
     # write out new strategy
@@ -175,12 +176,10 @@ def convert(file):
                 # check if output valid
                 if type(rolls) != int or rolls < MIN_ROLLS or rolls > MAX_ROLLS:
                     if type(rolls) != int:
-                        eprint("WARNING: team", output_name + "'s strategy function outputted something other than a number!")
+                        errname = "WARNING: team " + strat_name + "'s strategy function outputted something other than a number!"
                     else:
-                        eprint("WARNING: team", output_name + "'s strategy function outputted an invalid number of rolls:", rolls + "!")
-                        
-                    eprint("Due to invalid strategy function, all rolls for team", output_name , "will default to 4. Please notify the students!")
-                    
+                        errname = "WARNING: team " + strat_name + "'s strategy function outputted an invalid number of rolls:" + str(rolls) + "!"
+                    nerror+=1
                     rolls = ERROR_DEFAULT_ROLL
             
                 out.write(str(rolls))
@@ -192,7 +191,7 @@ def convert(file):
         out.write('\n')
         
     if nerror:
-        eprint ("\nERROR: " + str(nerror) + " error(s) occurred while running " + STRATEGY_FUNC_ATTR + ' for ' + output_name + '(' + file + "):") 
+        eprint ("\nERROR: " + str(nerror) + " error(s) occurred while running " + STRATEGY_FUNC_ATTR + ' for ' + strat_name + '(' + file + "):") 
         eprint (errname)
     
     out.flush()

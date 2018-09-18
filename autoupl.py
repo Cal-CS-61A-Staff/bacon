@@ -8,9 +8,9 @@ if len(sys.argv) > 1:
     token = sys.argv[1]
 
 # FILL THIS OUT
-EMAIL = "sxyu@berkeley.edu"
+EMAIL = "oski@berkeley.edu"
 OK_ASSIGNMENT = "cal/cs61a/fa18/proj01contest"
-SSH_USER, SSH_PASS, SSH_PATH = "oski", "oskipass", "berkeley.edu:public_html/hog.html"
+SSH_USER, SSH_PASS, SSH_PATH = "oski", "oskipass", "ssh.berkeley.edu:public_html/hog.html"
 SCP, SCP_PW = "pscp", True
 # END
     
@@ -38,7 +38,7 @@ if not token:
     token = execute(PY_EXE + " " + OK_PATH + ' ' + OK_TOKEN_CMD, EMAIL, True).split('\n')[3].split()[1].strip()
 else:
     print ("Using provided Okpy security token.")
-dirname = "hog_contest_" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(15))
+dirname = "hc" + ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(14))
 print("randomly generated directory name: " + dirname)
 
 import json, urllib.request
@@ -63,6 +63,7 @@ with urllib.request.urlopen(OK_SUBM_API_URL + token) as response:
        cnt += 1
        subm_dir = join(dirname, out_name)
        os.makedirs(subm_dir)
+       contents = contents.replace('\t', '    ') # fix tabs
        with open(join(subm_dir, SUBM_FILE_NAME), 'w', encoding="UTF-8") as f:
            f.write(contents)
    print("{} submissions downloaded from Okpy.org".format(cnt))

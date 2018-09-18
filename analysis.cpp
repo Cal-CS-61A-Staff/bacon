@@ -43,7 +43,7 @@ void LearningStrategy::learn(IStrategy & oppo_strat, int number,
 
         if (!quiet) {
             std::cout << "Learning procedure started.\n" << "Initial win rate: ";
-            std::cout << average_win_rate(testStrat, oppo_strat, -1, 0, 0, 0) << "\n\n";
+            std::cout << average_win_rate(testStrat, oppo_strat, -1, 0, 0, 0) << "\n" << std::endl;
         }
 
         for (int i = 0; i < number; ++i) {
@@ -75,11 +75,11 @@ void LearningStrategy::learn(IStrategy & oppo_strat, int number,
 
             if (!quiet) {
                 if (i % announce_interval == announce_interval - 1) {
-                    std::cout << i + 1 << " round" << (i ? "s" : "") << " of learning completed, " << number - i - 1 << " remaining. \n";
+                    std::cout << i + 1 << " round" << (i ? "s" : "") << " of learning completed, " << number - i - 1 << " remaining." << std::endl;
                 }
 
                 if (i % wr_interval == wr_interval - 1) {
-                    std::cout << "Updated Win rate @ " << i + 1 << ": " << best_awr << "\n\n";
+                    std::cout << "Updated Win rate @ " << i + 1 << ": " << best_awr << "\n" << std::endl;
                 }
             }
 
